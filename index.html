@@ -626,71 +626,83 @@ async function fetchFlight(){
   const WORKER='https://aviation-proxy.jack-focalist.workers.dev';
   let ok=false;
 
-  // 查询所有有效航班段，找到当前正在飞行或最近飞过的一段
-  const fltsToQuery=t.flights.filter(f=>f).map((f,i)=>({flt:f,date:t.dates[i]||t.dates[0],legIdx:i}));
+  // AviationStack：逐段查询，找到飞行中的那段
+  if(t.avKey){
+    const legs=[
+      {flt:t.flights[0], date:t.dates[0], idx:0},
+      {flt:t.flights[1], date:t.dates[1]||t.dates[0], idx:1},
+    ].filter(l=>l.flt&&l.flt.length>0);
 
-  let bestData=null, bestLegIdx=0;
+    console.log('查询航班段：', legs);
 
-  for(const {flt,date,legIdx} of fltsToQuery){
-    if(!t.avKey) break;
-    try{
-      const qs=new URLSearchParams({access_key:t.avKey,flight_iata:flt,limit:1});
-      if(date) qs.set('flight_date',date);
-      const apiUrl=`http://api.aviationstack.com/v1/flights?${qs}`;
-      const r=await fetch(`${WORKER}?target=${encodeURIComponent(apiUrl)}`);
-      if(!r.ok) continue;
-      const d=await r.json();
-      if(d.data&&d.data.length){
-        const flight=d.data[0];
-        const dep=new Date(flight.departure.actual||flight.departure.estimated||flight.departure.scheduled);
-        const arr=new Date(flight.arrival.actual||flight.arrival.estimated||flight.arrival.scheduled);
-        const now=Date.now();
-        // 优先选当前正在飞行的段（已起飞未落地）
-        const isActive=now>=dep&&now<arr;
-        const isCompleted=now>=arr;
-        if(isActive||(isCompleted&&!bestData)){
-          bestData=flight;bestLegIdx=legIdx;
-          if(isActive) break; // 找到飞行中的段，不再继续查
+    for(const leg of legs){
+      try{
+        const qs=new URLSearchParams({
+          access_key: t.avKey,
+          flight_iata: leg.flt,
+          limit: '1'
+        });
+        // 注意：flight_date 为付费功能，免费版不传日期，查当前实时航班
+        const apiUrl='http://api.aviationstack.com/v1/flights?'+qs.toString();
+        const proxyUrl=WORKER+'?target='+encodeURIComponent(apiUrl);
+        console.log('请求URL：', proxyUrl);
+        const r=await fetch(proxyUrl);
+        const text=await r.text();
+        console.log(`AviationStack leg${leg.idx} 原始返回：`, text.slice(0,300));
+        const d=JSON.parse(text);
+        if(d.data&&d.data.length){
+          const flight=d.data[0];
+          const depT=new Date(flight.departure.actual||flight.departure.estimated||flight.departure.scheduled);
+          const arrT=new Date(flight.arrival.actual||flight.arrival.estimated||flight.arrival.scheduled);
+          const now=Date.now();
+          const isActive=now>=depT&&now<arrT;
+          const isPast=now>=arrT;
+          console.log(`leg${leg.idx} depT=${depT} arrT=${arrT} isActive=${isActive} isPast=${isPast}`);
+          if(isActive||(isPast&&!ok)){
+            b.textContent='✈ AviationStack';b.className='src-badge';
+            renderProgressReal(flight,leg.idx);ok=true;
+            if(isActive)break;
+          }
+        }else{
+          console.warn(`AviationStack leg${leg.idx} 无数据：`,d.error||d);
         }
+      }catch(e){
+        console.warn(`AviationStack leg${leg.idx} 异常：`,e.message);
       }
-    }catch(e){console.warn(`AviationStack leg${legIdx} failed:`,e);}
-  }
-
-  if(bestData){
-    b.textContent='✈ AviationStack';b.className='src-badge';
-    renderProgressReal(bestData,bestLegIdx);ok=true;
+    }
+  }else{
+    console.warn('未填 AviationStack Key，跳过');
   }
 
   // OpenSky 兜底
   if(!ok){
-    const flt=t.flights.find(f=>f);
+    const flt=(t.flights[0]||t.flights[1]||'').replace(/\s/g,'').toUpperCase();
     const orig=AP[t.stops[0]];
-    if(flt&&orig){
+    if(flt&&orig?.icao){
       try{
         const nowSec=Math.floor(Date.now()/1000);
-        const begin=nowSec-8*3600;
-        const osUrl=`https://opensky-network.org/api/flights/departure?airport=${orig.icao||'VHHH'}&begin=${begin}&end=${nowSec}`;
-        const r=await fetch(osUrl,{credentials:'omit'});
+        const osUrl=`https://opensky-network.org/api/flights/departure?airport=${orig.icao}&begin=${nowSec-8*3600}&end=${nowSec}`;
+        const r=await fetch(osUrl,{credentials:'omit',mode:'cors'});
         if(r.ok){
           const d=await r.json();
-          const prefix=flt.replace(/\s/g,'').toUpperCase();
-          const match=Array.isArray(d)&&d.find(f=>f.callsign&&f.callsign.trim().toUpperCase()===prefix);
+          const match=Array.isArray(d)&&d.find(f=>f.callsign&&f.callsign.trim().toUpperCase()===flt);
           if(match){
             b.textContent='✈ OpenSky（兜底）';b.className='src-badge fallback';
-            const depUtc=(match.firstSeen||match.lastSeen)*1000;
+            const depUtc=(match.firstSeen)*1000;
             const totalMs=(calcDist(t.stops)/850)*3600000;
             const pct=Math.max(0,Math.min(100,Math.round((Date.now()-depUtc)/totalMs*100)));
             document.getElementById('slider').value=pct;setProgress(pct);
             ok=true;
           }
         }
-      }catch(e){console.warn('OpenSky failed:',e);}
+      }catch(e){console.warn('OpenSky failed:',e.message);}
     }
   }
 
   // 时刻估算兜底
   if(!ok){
-    const flt=t.flights[0],date=t.dates[0];
+    const flt=t.flights[0]||t.flights[1];
+    const date=t.dates[0];
     if(flt&&date){
       b.textContent='✈ 时刻估算';b.className='src-badge fallback';
       renderProgressBySchedule(flt,date,t.stops);
