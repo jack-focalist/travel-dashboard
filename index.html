@@ -619,85 +619,86 @@ function renderFX(){
 async function fetchFlight(){
   const t=C();
   if(t.mockMode){renderProgressMock();return;}
-  const flt=t.flights[0],date=t.dates[0];
-  if(!flt){renderProgressMock();return;}
 
   const b=document.getElementById('src-flight');
   b.textContent='✈ 查询中...';b.className='src-badge mock';
 
+  const WORKER='https://aviation-proxy.jack-focalist.workers.dev';
   let ok=false;
 
-  // AviationStack：通过 Cloudflare Worker 中转，解决 HTTP/HTTPS 限制
-  const WORKER='https://aviation-proxy.jack-focalist.workers.dev';
-  if(t.avKey){
+  // 查询所有有效航班段，找到当前正在飞行或最近飞过的一段
+  const fltsToQuery=t.flights.filter(f=>f).map((f,i)=>({flt:f,date:t.dates[i]||t.dates[0],legIdx:i}));
+
+  let bestData=null, bestLegIdx=0;
+
+  for(const {flt,date,legIdx} of fltsToQuery){
+    if(!t.avKey) break;
     try{
       const qs=new URLSearchParams({access_key:t.avKey,flight_iata:flt,limit:1});
-      if(date)qs.set('flight_date',date);
+      if(date) qs.set('flight_date',date);
       const apiUrl=`http://api.aviationstack.com/v1/flights?${qs}`;
       const r=await fetch(`${WORKER}?target=${encodeURIComponent(apiUrl)}`);
-      if(r.ok){
-        const d=await r.json();
-        if(d.data&&d.data.length){
-          b.textContent='✈ AviationStack';b.className='src-badge';
-          renderProgressReal(d.data[0]);ok=true;
-        }else if(d.error){
-          console.warn('AviationStack:',d.error.message||d.error.type);
+      if(!r.ok) continue;
+      const d=await r.json();
+      if(d.data&&d.data.length){
+        const flight=d.data[0];
+        const dep=new Date(flight.departure.actual||flight.departure.estimated||flight.departure.scheduled);
+        const arr=new Date(flight.arrival.actual||flight.arrival.estimated||flight.arrival.scheduled);
+        const now=Date.now();
+        // 优先选当前正在飞行的段（已起飞未落地）
+        const isActive=now>=dep&&now<arr;
+        const isCompleted=now>=arr;
+        if(isActive||(isCompleted&&!bestData)){
+          bestData=flight;bestLegIdx=legIdx;
+          if(isActive) break; // 找到飞行中的段，不再继续查
         }
       }
-    }catch(e){console.warn('AviationStack failed:',e);}
+    }catch(e){console.warn(`AviationStack leg${legIdx} failed:`,e);}
   }
 
-  // OpenSky 兜底：查询航班号对应的实时状态
-  // 用 /flights/all 按时间段查，credentials:'omit' 解决 null-origin CORS 问题
+  if(bestData){
+    b.textContent='✈ AviationStack';b.className='src-badge';
+    renderProgressReal(bestData,bestLegIdx);ok=true;
+  }
+
+  // OpenSky 兜底
   if(!ok){
-    try{
-      const nowSec=Math.floor(Date.now()/1000);
-      // 往前查8小时，覆盖长途航班
-      const begin=nowSec-8*3600;
-      // OpenSky 把航班号存在 callsign 字段（去空格后匹配）
-      // 用出发地机场 icao 过滤减少数据量
-      const orig=AP[t.stops[0]];
-      let osUrl=`https://opensky-network.org/api/flights/departure?airport=${orig?.icao||'VHHH'}&begin=${begin}&end=${nowSec}`;
-      const r=await fetch(osUrl,{credentials:'omit'});
-      if(r.ok){
-        const d=await r.json();
-        const prefix=flt.replace(/\s/g,'').toUpperCase();
-        const match=Array.isArray(d)&&d.find(f=>
-          f.callsign&&f.callsign.trim().toUpperCase()===prefix
-        );
-        if(match){
-          b.textContent='✈ OpenSky（兜底）';b.className='src-badge fallback';
-          // 用 OpenSky 的起飞/落地时间戳计算进度
-          const depUtc=(match.firstSeen||match.lastSeen)*1000;
-          // OpenSky 不提供预计落地，用总里程/速度估算落地时间
-          const totalMs=(calcDist(t.stops)/850)*3600000;
-          const pct=Math.max(0,Math.min(100,Math.round((Date.now()-depUtc)/totalMs*100)));
-          document.getElementById('slider').value=pct;
-          setProgress(pct);
-          document.getElementById('flt-detail').style.display='flex';
-          const depT=new Date(depUtc);
-          const tz0=AP[t.stops[0]]?.tz;
-          document.getElementById('fi-dep').textContent=' '+depT.toLocaleTimeString('zh',{timeZone:tz0,hour:'2-digit',minute:'2-digit'})+'（实际）';
-          document.getElementById('fi-arr').textContent=' 估算中';
-          document.getElementById('fi-dly').textContent=' --';
-          document.getElementById('fi-dur').textContent=' 估算中';
-          const remMs=Math.max(0,depUtc+totalMs-Date.now());
-          const rh=Math.floor(remMs/3600000),rm=Math.round((remMs%3600000)/60000);
-          b.textContent=`✈ OpenSky · 剩${rh>0?rh+'小时':''}${rm}分`;
-          ok=true;
+    const flt=t.flights.find(f=>f);
+    const orig=AP[t.stops[0]];
+    if(flt&&orig){
+      try{
+        const nowSec=Math.floor(Date.now()/1000);
+        const begin=nowSec-8*3600;
+        const osUrl=`https://opensky-network.org/api/flights/departure?airport=${orig.icao||'VHHH'}&begin=${begin}&end=${nowSec}`;
+        const r=await fetch(osUrl,{credentials:'omit'});
+        if(r.ok){
+          const d=await r.json();
+          const prefix=flt.replace(/\s/g,'').toUpperCase();
+          const match=Array.isArray(d)&&d.find(f=>f.callsign&&f.callsign.trim().toUpperCase()===prefix);
+          if(match){
+            b.textContent='✈ OpenSky（兜底）';b.className='src-badge fallback';
+            const depUtc=(match.firstSeen||match.lastSeen)*1000;
+            const totalMs=(calcDist(t.stops)/850)*3600000;
+            const pct=Math.max(0,Math.min(100,Math.round((Date.now()-depUtc)/totalMs*100)));
+            document.getElementById('slider').value=pct;setProgress(pct);
+            ok=true;
+          }
         }
-      }
-    }catch(e){console.warn('OpenSky failed:',e);}
+      }catch(e){console.warn('OpenSky failed:',e);}
+    }
   }
 
-  // 最终降级：按航班时刻表估算
-  // 用出发日期 + 已知的常用航班出发时刻做合理估算
-  if(!ok&&date&&flt){
-    b.textContent='✈ 时刻估算';b.className='src-badge fallback';
-    renderProgressBySchedule(flt,date,t.stops);
-    ok=true;
+  // 时刻估算兜底
+  if(!ok){
+    const flt=t.flights[0],date=t.dates[0];
+    if(flt&&date){
+      b.textContent='✈ 时刻估算';b.className='src-badge fallback';
+      renderProgressBySchedule(flt,date,t.stops);
+    }else{
+      b.textContent='✈ 无法查询';b.className='src-badge fallback';
+      renderProgressMock();
+    }
   }
-  if(!ok){b.textContent='✈ 无法查询';b.className='src-badge fallback';renderProgressMock();}
 }
 
 // 已知航班时刻表（本地出发时间 + 飞行时长）
