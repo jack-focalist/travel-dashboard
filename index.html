@@ -627,12 +627,14 @@ async function fetchFlight(){
 
   let ok=false;
 
-  // AviationStack：本地file://直接调HTTP，不需要代理
+  // AviationStack：通过 Cloudflare Worker 中转，解决 HTTP/HTTPS 限制
+  const WORKER='https://aviation-proxy.jack-focalist.workers.dev';
   if(t.avKey){
     try{
       const qs=new URLSearchParams({access_key:t.avKey,flight_iata:flt,limit:1});
       if(date)qs.set('flight_date',date);
-      const r=await fetch(`http://api.aviationstack.com/v1/flights?${qs}`);
+      const apiUrl=`http://api.aviationstack.com/v1/flights?${qs}`;
+      const r=await fetch(`${WORKER}?target=${encodeURIComponent(apiUrl)}`);
       if(r.ok){
         const d=await r.json();
         if(d.data&&d.data.length){
