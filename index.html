@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>旅行仪表盘 V2.1</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh;padding:1.25rem}
+
+/* ── 顶栏 ── */
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.topbar h1{font-size:17px;font-weight:500}
+.topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.src-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:#EAF3DE;color:#3B6D11;white-space:nowrap}
+.src-badge.fallback{background:#FAEEDA;color:#854F0B}
+.src-badge.mock{background:#E6F1FB;color:#185FA5}
+.btn{font-size:12px;padding:5px 12px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;background:#fff;cursor:pointer;color:#1a1a18}
+.btn:hover{background:#f0efe9}
+.btn.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
+
+/* ── 行程切换 ── */
+.trip-tabs{display:flex;gap:6px;margin-bottom:1rem;align-items:center}
+.trip-tab{font-size:12px;padding:5px 14px;border:0.5px solid rgba(0,0,0,0.18);border-radius:20px;cursor:pointer;background:#fff;color:#73726c}
+.trip-tab.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.trip-tab-add{font-size:12px;padding:5px 10px;border:0.5px dashed rgba(0,0,0,0.2);border-radius:20px;cursor:pointer;background:transparent;color:#888780}
+.trip-tab-add:hover{background:#f0efe9}
+
+/* ── 设置面板 ── */
+.settings-panel{background:#fff;border:0.5px solid rgba(0,0,0,0.11);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1rem;display:none}
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin-bottom:12px}
+.field label{font-size:11px;color:#888780;display:block;margin-bottom:3px}
+.field input,.field select{width:100%;font-size:13px;padding:6px 9px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;background:#fff;color:#1a1a18;outline:none}
+.field input:focus,.field select:focus{border-color:#378ADD}
+.ac-wrap{position:relative}
+.ac-drop{position:absolute;top:100%;left:0;right:0;background:#fff;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;z-index:99;max-height:160px;overflow-y:auto;margin-top:2px;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.ac-item{padding:7px 10px;font-size:12px;cursor:pointer;border-bottom:0.5px solid rgba(0,0,0,0.06)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover{background:#f0efe9}
+.ac-code{font-weight:500;color:#1a1a18;margin-right:6px}
+.ac-city{color:#73726c}
+.settings-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn-primary{font-size:13px;padding:7px 16px;border:none;border-radius:8px;background:#1a1a18;color:#fff;cursor:pointer}
+.btn-primary:hover{background:#333}
+.settings-note{font-size:11px;color:#b4b2a9;margin-left:auto}
+
+/* ── 城市卡片 ── */
+.section-label{font-size:11px;color:#888780;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;margin-top:1.25rem}
+.cities{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.city-card{background:#fff;border:0.5px solid rgba(0,0,0,0.11);border-radius:14px;overflow:hidden;transition:box-shadow .2s}
+.city-card.active{box-shadow:0 0 0 1.5px #378ADD}
+
+/* 联络状态横条 */
+.call-bar{height:5px;width:100%;transition:background .4s}
+.call-bar.ok{background:#639922}
+.call-bar.warn{background:#EF9F27}
+.call-bar.no{background:#E24B4A}
+
+.card-body{padding:.9rem 1rem}
+.city-tag{font-size:10px;font-weight:500;color:#888780;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1px}
+.city-name{font-size:14px;font-weight:500;color:#1a1a18;margin-bottom:6px}
+
+/* 时钟区 */
+.clock-row{display:flex;align-items:baseline;gap:8px;margin-bottom:2px}
+.city-time{font-size:30px;font-weight:500;color:#1a1a18;line-height:1;letter-spacing:-.5px}
+.call-inline{font-size:11px;font-weight:500;padding:2px 7px;border-radius:10px;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+.call-inline.ok{background:#EAF3DE;color:#3B6D11}
+.call-inline.warn{background:#FAEEDA;color:#854F0B}
+.call-inline.no{background:#FCEBEB;color:#A32D2D}
+.city-date{font-size:13px;color:#73726c;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.day-diff{font-size:11px;background:#FAEEDA;color:#854F0B;border-radius:6px;padding:1px 6px;font-weight:500}
+
+/* 天气 */
+.wx-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.wx-temp{font-size:15px;font-weight:500;color:#1a1a18}
+.wx-desc{font-size:11px;color:#73726c}
+.outfit-tip{font-size:11px;color:#3B6D11;background:#EAF3DE;border-radius:6px;padding:4px 7px;margin-bottom:8px;line-height:1.45}
+
+.divider{height:.5px;background:rgba(0,0,0,0.08);margin:7px 0}
+.info-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:2px 0}
+.info-label{color:#888780}
+.info-val{font-weight:500;color:#1a1a18;text-align:right;font-size:12px}
+.emerg-val{color:#A32D2D;font-weight:500;font-size:12px}
+
+/* ── 进度卡 ── */
+.prog-card{background:#fff;border:.5px solid rgba(0,0,0,0.11);border-radius:14px;padding:1rem 1.15rem;margin-top:4px}
+.prog-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;flex-wrap:wrap;gap:6px}
+.route-codes{font-size:15px;font-weight:500;color:#1a1a18}
+.leg-status{font-size:12px;color:#185FA5;font-weight:500}
+.flight-detail-row{display:none;gap:12px;margin-bottom:.9rem;flex-wrap:wrap}
+.fi{font-size:12px;color:#73726c}
+.fi b{font-weight:500;color:#1a1a18;margin-left:3px}
+.fi.delay b{color:#A32D2D}
+.track-wrap{position:relative;margin:0 6px 2.2rem}
+.track-bg{height:4px;background:#e8e7e2;border-radius:2px;position:relative}
+.track-fill{height:4px;border-radius:2px;background:#378ADD;position:absolute;left:0;top:0;transition:width .4s}
+.nodes-row{display:flex;justify-content:space-between;position:absolute;top:-9px;left:0;right:0;pointer-events:none}
+.nd{width:22px;height:22px;border-radius:50%;border:2px solid #378ADD;background:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:#378ADD;transition:all .3s}
+.nd.done{background:#378ADD;color:#fff}
+.node-labels{display:flex;justify-content:space-between;margin-top:6px}
+.nl{font-size:10px;color:#888780;line-height:1.4}
+.nl:nth-child(2){text-align:center}
+.nl:last-child{text-align:right}
+input[type=range]{width:100%;height:22px;opacity:0;cursor:pointer;position:relative;z-index:2;margin:-11px 0 0;display:block}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-top:10px;border-top:.5px solid rgba(0,0,0,0.08)}
+.stat{text-align:center}
+.stat-label{font-size:10px;color:#888780;margin-bottom:2px}
+.stat-val{font-size:13px;font-weight:500;color:#1a1a18}
+.stat-val.blue{color:#185FA5}
+
+/* ── 提示卡 ── */
+.tips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+.tip-card{background:#f0efe9;border-radius:10px;padding:.8rem .95rem}
+.tip-city{font-size:10px;color:#888780;font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.tip-text{font-size:12px;color:#3d3d3a;line-height:1.55}
+
+.footer{font-size:11px;color:#b4b2a9;text-align:center;margin-top:1.5rem}
+</style>
+</head>
+<body>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <h1>旅行仪表盘 <small style="font-size:12px;color:#888780;font-weight:400">V2.1</small></h1>
+  <div class="topbar-right">
+    <span class="src-badge mock" id="src-flight">✈ 测试模式</span>
+    <span class="src-badge" id="src-wx">🌤 天气</span>
+    <span class="src-badge" id="src-fx">💱 汇率</span>
+    <button class="btn active" id="btn-mode" onclick="toggleMode()">🧪 测试</button>
+    <button class="btn" onclick="toggleSettings()">⚙ 设置</button>
+  </div>
+</div>
+
+<!-- 行程标签 -->
+<div class="trip-tabs" id="trip-tabs"></div>
+
+<!-- 设置面板 -->
+<div class="settings-panel" id="settings-panel">
+  <div class="settings-grid">
+    <div class="field"><label>出发地 IATA</label>
+      <div class="ac-wrap"><input id="s-iata0" placeholder="如 HKG" maxlength="3" oninput="acInput('s-iata0',this.value)" autocomplete="off"><div class="ac-drop" id="ac-s-iata0"></div></div></div>
+    <div class="field"><label>中转地（可空）</label>
+      <div class="ac-wrap"><input id="s-iata1" placeholder="如 IST" maxlength="3" oninput="acInput('s-iata1',this.value)" autocomplete="off"><div class="ac-drop" id="ac-s-iata1"></div></div></div>
+    <div class="field"><label>第二中转（可空）</label>
+      <div class="ac-wrap"><input id="s-iata2" placeholder="如 FRA" maxlength="3" oninput="acInput('s-iata2',this.value)" autocomplete="off"><div class="ac-drop" id="ac-s-iata2"></div></div></div>
+    <div class="field"><label>目的地 IATA</label>
+      <div class="ac-wrap"><input id="s-iata3" placeholder="如 GRU" maxlength="3" oninput="acInput('s-iata3',this.value)" autocomplete="off"><div class="ac-drop" id="ac-s-iata3"></div></div></div>
+    <div class="field"><label>航班号·第一段（可选）</label><input id="s-flt0" placeholder="如 TK758"></div>
+    <div class="field"><label>出发日期·第一段</label><input id="s-date0" type="date"></div>
+    <div class="field"><label>航班号·第二段（可选）</label><input id="s-flt1" placeholder="如 TK15"></div>
+    <div class="field"><label>出发日期·第二段</label><input id="s-date1" type="date"></div>
+    <div class="field"><label>AviationStack Key</label><input id="s-avkey" type="password" placeholder="粘贴 Key（可选）"></div>
+    <div class="field"><label>基准货币（你口袋里的钱）</label>
+      <select id="s-ccy"><option value="HKD">HKD 港元</option><option value="USD">USD 美元</option><option value="EUR">EUR 欧元</option><option value="CNY">CNY 人民币</option><option value="GBP">GBP 英镑</option></select></div>
+  </div>
+  <div class="settings-actions">
+    <button class="btn-primary" onclick="applySettings()">确认并刷新</button>
+    <span class="settings-note">设置保存本地，不上传服务器</span>
+  </div>
+</div>
+
+<!-- 城市卡片 -->
+<p class="section-label">三城实时状态</p>
+<div class="cities" id="cities-wrap"></div>
+
+<!-- 进度 -->
+<p class="section-label">航班进度 <span id="prog-note" style="font-size:10px;color:#b4b2a9;font-style:italic;text-transform:none;letter-spacing:0"></span></p>
+<div class="prog-card">
+  <div class="prog-header">
+    <span class="route-codes" id="route-label">--</span>
+    <span class="leg-status" id="leg-label">--</span>
+  </div>
+  <div class="flight-detail-row" id="flt-detail">
+    <div class="fi">出发<b id="fi-dep">--</b></div>
+    <div class="fi">落地<b id="fi-arr">--</b></div>
+    <div class="fi" id="fi-dly-wrap">延误<b id="fi-dly">--</b></div>
+    <div class="fi">时长<b id="fi-dur">--</b></div>
+  </div>
+  <div class="track-wrap">
+    <div class="track-bg">
+      <div class="track-fill" id="tfill"></div>
+      <div class="nodes-row" id="nodes-row"></div>
+    </div>
+    <input type="range" min="0" max="100" value="0" id="slider" aria-label="旅行进度">
+    <div class="node-labels" id="node-labels"></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-label">当前阶段</div><div class="stat-val" id="s-stage">--</div></div>
+    <div class="stat"><div class="stat-label">已飞行</div><div class="stat-val blue" id="s-flown">--</div></div>
+    <div class="stat"><div class="stat-label">剩余</div><div class="stat-val" id="s-remain">--</div></div>
+    <div class="stat"><div class="stat-label">总里程</div><div class="stat-val" id="s-dist">--</div></div>
+  </div>
+</div>
+
+<!-- 提示 -->
+<p class="section-label">旅途提示</p>
+<div class="tips" id="tips-wrap"></div>
+
+<div class="footer" id="footer-txt">V2.1 · 时钟每分钟更新 · 天气/汇率每10分钟缓存</div>
+
+<script>
+// ══════════════════════════════════════
+// 机场字典
+// ══════════════════════════════════════
+const AP={
+  HKG:{city:'香港',en:'Hong Kong',cc:'HK',tz:'Asia/Hong_Kong',lat:22.308,lng:113.915,ccy:'HKD',icao:'VHHH'},
+  IST:{city:'伊斯坦布尔',en:'Istanbul',cc:'TR',tz:'Europe/Istanbul',lat:41.275,lng:28.752,ccy:'TRY',icao:'LTFM'},
+  GRU:{city:'圣保罗',en:'São Paulo',cc:'BR',tz:'America/Sao_Paulo',lat:-23.432,lng:-46.469,ccy:'BRL',icao:'SBGR'},
+  LHR:{city:'伦敦',en:'London',cc:'GB',tz:'Europe/London',lat:51.477,lng:-0.461,ccy:'GBP',icao:'EGLL'},
+  CDG:{city:'巴黎',en:'Paris',cc:'FR',tz:'Europe/Paris',lat:49.009,lng:2.548,ccy:'EUR',icao:'LFPG'},
+  FRA:{city:'法兰克福',en:'Frankfurt',cc:'DE',tz:'Europe/Berlin',lat:50.033,lng:8.571,ccy:'EUR',icao:'EDDF'},
+  AMS:{city:'阿姆斯特丹',en:'Amsterdam',cc:'NL',tz:'Europe/Amsterdam',lat:52.309,lng:4.764,ccy:'EUR',icao:'EHAM'},
+  DXB:{city:'迪拜',en:'Dubai',cc:'AE',tz:'Asia/Dubai',lat:25.253,lng:55.364,ccy:'AED',icao:'OMDB'},
+  SIN:{city:'新加坡',en:'Singapore',cc:'SG',tz:'Asia/Singapore',lat:1.359,lng:103.989,ccy:'SGD',icao:'WSSS'},
+  NRT:{city:'东京',en:'Tokyo',cc:'JP',tz:'Asia/Tokyo',lat:35.765,lng:140.386,ccy:'JPY',icao:'RJAA'},
+  ICN:{city:'首尔',en:'Seoul',cc:'KR',tz:'Asia/Seoul',lat:37.469,lng:126.451,ccy:'KRW',icao:'RKSI'},
+  PEK:{city:'北京',en:'Beijing',cc:'CN',tz:'Asia/Shanghai',lat:40.080,lng:116.584,ccy:'CNY',icao:'ZBAA'},
+  PVG:{city:'上海',en:'Shanghai',cc:'CN',tz:'Asia/Shanghai',lat:31.151,lng:121.805,ccy:'CNY',icao:'ZSPD'},
+  SYD:{city:'悉尼',en:'Sydney',cc:'AU',tz:'Australia/Sydney',lat:-33.946,lng:151.177,ccy:'AUD',icao:'YSSY'},
+  MEL:{city:'墨尔本',en:'Melbourne',cc:'AU',tz:'Australia/Melbourne',lat:-37.673,lng:144.843,ccy:'AUD',icao:'YMML'},
+  LAX:{city:'洛杉矶',en:'Los Angeles',cc:'US',tz:'America/Los_Angeles',lat:33.943,lng:-118.408,ccy:'USD',icao:'KLAX'},
+  JFK:{city:'纽约',en:'New York',cc:'US',tz:'America/New_York',lat:40.641,lng:-73.778,ccy:'USD',icao:'KJFK'},
+  SFO:{city:'旧金山',en:'San Francisco',cc:'US',tz:'America/Los_Angeles',lat:37.619,lng:-122.374,ccy:'USD',icao:'KSFO'},
+  ORD:{city:'芝加哥',en:'Chicago',cc:'US',tz:'America/Chicago',lat:41.978,lng:-87.905,ccy:'USD',icao:'KORD'},
+  YYZ:{city:'多伦多',en:'Toronto',cc:'CA',tz:'America/Toronto',lat:43.680,lng:-79.631,ccy:'CAD',icao:'CYYZ'},
+  MEX:{city:'墨西哥城',en:'Mexico City',cc:'MX',tz:'America/Mexico_City',lat:19.436,lng:-99.072,ccy:'MXN',icao:'MMMX'},
+  GIG:{city:'里约热内卢',en:'Rio de Janeiro',cc:'BR',tz:'America/Sao_Paulo',lat:-22.810,lng:-43.250,ccy:'BRL',icao:'SBGL'},
+  JNB:{city:'约翰内斯堡',en:'Johannesburg',cc:'ZA',tz:'Africa/Johannesburg',lat:-26.133,lng:28.242,ccy:'ZAR',icao:'FAOR'},
+  NBO:{city:'内罗毕',en:'Nairobi',cc:'KE',tz:'Africa/Nairobi',lat:-1.319,lng:36.925,ccy:'KES',icao:'HKJK'},
+  BOM:{city:'孟买',en:'Mumbai',cc:'IN',tz:'Asia/Kolkata',lat:19.089,lng:72.868,ccy:'INR',icao:'VABB'},
+  DEL:{city:'新德里',en:'New Delhi',cc:'IN',tz:'Asia/Kolkata',lat:28.556,lng:77.100,ccy:'INR',icao:'VIDP'},
+  BKK:{city:'曼谷',en:'Bangkok',cc:'TH',tz:'Asia/Bangkok',lat:13.681,lng:100.747,ccy:'THB',icao:'VTBS'},
+  KUL:{city:'吉隆坡',en:'Kuala Lumpur',cc:'MY',tz:'Asia/Kuala_Lumpur',lat:2.745,lng:101.710,ccy:'MYR',icao:'WMKK'},
+  MNL:{city:'马尼拉',en:'Manila',cc:'PH',tz:'Asia/Manila',lat:14.509,lng:121.019,ccy:'PHP',icao:'RPLL'},
+  CGK:{city:'雅加达',en:'Jakarta',cc:'ID',tz:'Asia/Jakarta',lat:-6.126,lng:106.656,ccy:'IDR',icao:'WIII'},
+  DOH:{city:'多哈',en:'Doha',cc:'QA',tz:'Asia/Qatar',lat:25.274,lng:51.608,ccy:'QAR',icao:'OTHH'},
+  AUH:{city:'阿布扎比',en:'Abu Dhabi',cc:'AE',tz:'Asia/Dubai',lat:24.433,lng:54.651,ccy:'AED',icao:'OMAA'},
+  FCO:{city:'罗马',en:'Rome',cc:'IT',tz:'Europe/Rome',lat:41.800,lng:12.239,ccy:'EUR',icao:'LIRF'},
+  MAD:{city:'马德里',en:'Madrid',cc:'ES',tz:'Europe/Madrid',lat:40.472,lng:-3.561,ccy:'EUR',icao:'LEMD'},
+  BCN:{city:'巴塞罗那',en:'Barcelona',cc:'ES',tz:'Europe/Madrid',lat:41.297,lng:2.083,ccy:'EUR',icao:'LEBL'},
+  ZRH:{city:'苏黎世',en:'Zurich',cc:'CH',tz:'Europe/Zurich',lat:47.464,lng:8.549,ccy:'CHF',icao:'LSZH'},
+  VIE:{city:'维也纳',en:'Vienna',cc:'AT',tz:'Europe/Vienna',lat:48.110,lng:16.570,ccy:'EUR',icao:'LOWW'},
+  MUC:{city:'慕尼黑',en:'Munich',cc:'DE',tz:'Europe/Berlin',lat:48.354,lng:11.786,ccy:'EUR',icao:'EDDM'},
+  CPH:{city:'哥本哈根',en:'Copenhagen',cc:'DK',tz:'Europe/Copenhagen',lat:55.618,lng:12.656,ccy:'DKK',icao:'EKCH'},
+  ARN:{city:'斯德哥尔摩',en:'Stockholm',cc:'SE',tz:'Europe/Stockholm',lat:59.651,lng:17.919,ccy:'SEK',icao:'ESSA'},
+  HEL:{city:'赫尔辛基',en:'Helsinki',cc:'FI',tz:'Europe/Helsinki',lat:60.317,lng:24.963,ccy:'EUR',icao:'EFHK'},
+  WAW:{city:'华沙',en:'Warsaw',cc:'PL',tz:'Europe/Warsaw',lat:52.166,lng:20.967,ccy:'PLN',icao:'EPWA'},
+  CAI:{city:'开罗',en:'Cairo',cc:'EG',tz:'Africa/Cairo',lat:30.122,lng:31.406,ccy:'EGP',icao:'HECA'},
+  AKL:{city:'奥克兰',en:'Auckland',cc:'NZ',tz:'Pacific/Auckland',lat:-37.008,lng:174.792,ccy:'NZD',icao:'NZAA'},
+  GVA:{city:'日内瓦',en:'Geneva',cc:'CH',tz:'Europe/Zurich',lat:46.238,lng:6.109,ccy:'CHF',icao:'LSGG'},
+  BRU:{city:'布鲁塞尔',en:'Brussels',cc:'BE',tz:'Europe/Brussels',lat:50.901,lng:4.484,ccy:'EUR',icao:'EBBR'},
+  MXP:{city:'米兰',en:'Milan',cc:'IT',tz:'Europe/Rome',lat:45.630,lng:8.723,ccy:'EUR',icao:'LIMC'},
+  LIS:{city:'里斯本',en:'Lisbon',cc:'PT',tz:'Europe/Lisbon',lat:38.774,lng:-9.135,ccy:'EUR',icao:'LPPT'},
+  ATH:{city:'雅典',en:'Athens',cc:'GR',tz:'Europe/Athens',lat:37.936,lng:23.944,ccy:'EUR',icao:'LGAV'},
+  ADD:{city:'亚的斯亚贝巴',en:'Addis Ababa',cc:'ET',tz:'Africa/Addis_Ababa',lat:8.977,lng:38.799,ccy:'ETB',icao:'HAAB'},
+};
+
+const EMERG={
+  HK:{p:'999',a:'999',f:'999'},TR:{p:'155',a:'112',f:'110'},BR:{p:'190',a:'192',f:'193'},
+  GB:{p:'999',a:'999',f:'999'},FR:{p:'17',a:'15',f:'18'},DE:{p:'110',a:'112',f:'112'},
+  NL:{p:'112',a:'112',f:'112'},AE:{p:'999',a:'998',f:'997'},SG:{p:'999',a:'995',f:'995'},
+  JP:{p:'110',a:'119',f:'119'},KR:{p:'112',a:'119',f:'119'},CN:{p:'110',a:'120',f:'119'},
+  AU:{p:'000',a:'000',f:'000'},US:{p:'911',a:'911',f:'911'},CA:{p:'911',a:'911',f:'911'},
+  QA:{p:'999',a:'999',f:'999'},IT:{p:'113',a:'118',f:'115'},ES:{p:'091',a:'112',f:'080'},
+  CH:{p:'117',a:'144',f:'118'},AT:{p:'133',a:'144',f:'122'},DK:{p:'114',a:'112',f:'112'},
+  SE:{p:'114',a:'112',f:'112'},FI:{p:'112',a:'112',f:'112'},PL:{p:'997',a:'999',f:'998'},
+  EG:{p:'122',a:'123',f:'180'},NZ:{p:'111',a:'111',f:'111'},BE:{p:'101',a:'100',f:'100'},
+  PT:{p:'112',a:'112',f:'112'},GR:{p:'100',a:'166',f:'199'},TH:{p:'191',a:'1669',f:'199'},
+  MY:{p:'999',a:'999',f:'994'},PH:{p:'911',a:'911',f:'911'},ID:{p:'110',a:'118',f:'113'},
+  IN:{p:'100',a:'108',f:'101'},MX:{p:'911',a:'911',f:'911'},ZA:{p:'10111',a:'10177',f:'999'},
+  KE:{p:'999',a:'999',f:'999'},ET:{p:'991',a:'907',f:'939'},
+};
+const emerg=cc=>EMERG[cc]||{p:'112',a:'112',f:'112'};
+
+// 天气
+const wxIcon=c=>c<=1?'☀️':c<=3?'⛅':c<=48?'🌫':c<=57?'🌦':c<=67?'🌧':c<=77?'🌨':c<=82?'🌧':'⛈';
+const wxDesc=c=>c<=1?'晴朗':c<=3?'多云':c<=48?'雾/霾':c<=57?'毛毛雨':c<=67?'有雨':c<=77?'降雪':c<=82?'阵雨':'雷暴';
+function outfitTip(t,c){
+  const r=c>=51; // 有降水
+  const rain=s=>r?s+'+雨具☔':s;
+  if(t>=32) return rain('☀ 高温，短袖防晒');
+  if(t>=28) return rain('👕 温热，短袖');
+  if(t>=23) return rain('🧥 舒适，薄长袖');
+  if(t>=18) return rain('🧥 微凉，薄外套');
+  if(t>=13) return rain('🧣 凉爽，外套');
+  if(t>= 8) return rain('🧤 寒凉，厚外套或轻薄羽绒');
+  if(t>= 3) return rain('🧤 寒冷，羽绒服');
+  return rain('🥶 严寒，厚羽绒+手套帽子');
+}
+
+// ══════════════════════════════════════
+// 状态
+// ══════════════════════════════════════
+const BLANK_TRIP={stops:['HKG','IST','GRU'],flights:['',''],dates:['',''],avKey:'',baseCcy:'HKD',mockMode:true};
+let TRIPS=[JSON.parse(JSON.stringify(BLANK_TRIP)),{...JSON.parse(JSON.stringify(BLANK_TRIP)),stops:['GRU','IST','HKG'],flights:['',''],dates:['','']}];
+TRIPS[0].label='去程'; TRIPS[1].label='回程';
+let activeTrip=0;
+let wxCache={},fxCache={},fxTime=0;
+const CACHE=10*60*1000;
+
+function C(){return TRIPS[activeTrip];}
+
+// ══════════════════════════════════════
+// 行程标签
+// ══════════════════════════════════════
+function renderTabs(){
+  const wrap=document.getElementById('trip-tabs');
+  wrap.innerHTML='';
+  TRIPS.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.className='trip-tab'+(i===activeTrip?' active':'');
+    b.textContent=t.label||(i===0?'去程':'行程'+(i+1));
+    b.onclick=()=>{activeTrip=i;renderTabs();loadSettingsToUI();buildUI();fetchAll();};
+    wrap.appendChild(b);
+  });
+  const add=document.createElement('button');
+  add.className='trip-tab-add';add.textContent='+ 新行程';
+  add.onclick=()=>{
+    const t=JSON.parse(JSON.stringify(BLANK_TRIP));
+    t.label='行程'+(TRIPS.length+1);
+    TRIPS.push(t);activeTrip=TRIPS.length-1;
+    renderTabs();loadSettingsToUI();buildUI();
+  };
+  wrap.appendChild(add);
+}
+
+// ══════════════════════════════════════
+// 自动补全
+// ══════════════════════════════════════
+function acInput(fieldId,val){
+  const q=val.toUpperCase().trim();
+  const drop=document.getElementById('ac-'+fieldId);
+  if(q.length<1){drop.style.display='none';return;}
+  const hits=Object.entries(AP).filter(([k,v])=>
+    k.startsWith(q)||v.en.toLowerCase().includes(q.toLowerCase())||v.city.includes(q)
+  ).slice(0,6);
+  if(!hits.length){drop.style.display='none';return;}
+  drop.innerHTML=hits.map(([k,v])=>
+    `<div class="ac-item" onclick="acSel('${fieldId}','${k}')"><span class="ac-code">${k}</span><span class="ac-city">${v.city} · ${v.en}</span></div>`
+  ).join('');
+  drop.style.display='block';
+}
+function acSel(fieldId,code){
+  document.getElementById(fieldId).value=code;
+  document.getElementById('ac-'+fieldId).style.display='none';
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ac-wrap'))
+    document.querySelectorAll('.ac-drop').forEach(d=>d.style.display='none');
+});
+
+// ══════════════════════════════════════
+// 设置面板
+// ══════════════════════════════════════
+function toggleSettings(){
+  const p=document.getElementById('settings-panel');
+  p.style.display=p.style.display==='none'||p.style.display===''?'block':'none';
+}
+function loadSettingsToUI(){
+  const t=C();
+  document.getElementById('s-iata0').value=t.stops[0]||'';
+  document.getElementById('s-iata1').value=t.stops.length>2?t.stops[1]:'';
+  document.getElementById('s-iata2').value=t.stops.length>3?t.stops[2]:'';
+  document.getElementById('s-iata3').value=t.stops[t.stops.length-1]||'';
+  document.getElementById('s-flt0').value=t.flights[0]||'';
+  document.getElementById('s-date0').value=t.dates[0]||'';
+  document.getElementById('s-flt1').value=t.flights[1]||'';
+  document.getElementById('s-date1').value=t.dates[1]||'';
+  document.getElementById('s-avkey').value=t.avKey||'';
+  document.getElementById('s-ccy').value=t.baseCcy;
+}
+function applySettings(){
+  const codes=[
+    document.getElementById('s-iata0').value.toUpperCase().trim(),
+    document.getElementById('s-iata1').value.toUpperCase().trim(),
+    document.getElementById('s-iata2').value.toUpperCase().trim(),
+    document.getElementById('s-iata3').value.toUpperCase().trim(),
+  ].filter(c=>c&&AP[c]);
+  const stops=[...new Map(codes.map(c=>[c,c])).values()];
+  if(stops.length<2){alert('至少需要有效的出发地和目的地');return;}
+  const t=C();
+  t.stops=stops;
+  t.flights=[document.getElementById('s-flt0').value.trim().toUpperCase(),document.getElementById('s-flt1').value.trim().toUpperCase()];
+  t.dates=[document.getElementById('s-date0').value,document.getElementById('s-date1').value];
+  t.avKey=document.getElementById('s-avkey').value.trim();
+  t.baseCcy=document.getElementById('s-ccy').value;
+  // 有Key且有航班号时自动切换真实模式
+  if(t.avKey && t.flights[0]) t.mockMode=false;
+  saveLocal();wxCache={};fxCache={};fxTime=0;
+  document.getElementById('settings-panel').style.display='none';
+  buildUI();fetchAll();
+}
+function saveLocal(){try{localStorage.setItem('tv21',JSON.stringify(TRIPS));}catch(e){}}
+function loadLocal(){try{const s=localStorage.getItem('tv21');if(s)TRIPS=JSON.parse(s);}catch(e){}}
+
+// ══════════════════════════════════════
+// 测试/真实模式
+// ══════════════════════════════════════
+function toggleMode(){
+  C().mockMode=!C().mockMode;
+  const m=C().mockMode;
+  const btn=document.getElementById('btn-mode');
+  btn.textContent=m?'🧪 测试':'🛰 真实';
+  btn.classList.toggle('active',m);
+  updateFlightBadge();
+  if(!m)fetchFlight();else renderProgressMock();
+}
+function updateFlightBadge(){
+  const b=document.getElementById('src-flight'),m=C().mockMode;
+  b.textContent=m?'✈ 测试模式':'✈ AviationStack';
+  b.className='src-badge'+(m?' mock':'');
+}
+
+// ══════════════════════════════════════
+// 建立UI
+// ══════════════════════════════════════
+function buildUI(){
+  const t=C(), stops=t.stops, n=stops.length;
+  const btn=document.getElementById('btn-mode');
+  btn.textContent=t.mockMode?'🧪 测试':'🛰 真实';
+  btn.classList.toggle('active',t.mockMode);
+  updateFlightBadge();
+
+  // 城市卡片
+  const cw=document.getElementById('cities-wrap');
+  cw.style.gridTemplateColumns=`repeat(${Math.min(n,3)},1fr)`;
+  cw.innerHTML='';
+  stops.forEach((code,i)=>{
+    const a=AP[code];
+    const role=i===0?'出发地':i===n-1?'目的地':(n>3?`中转 ${i}`:'中转');
+    cw.innerHTML+=`
+    <div class="city-card" id="card-${code}">
+      <div class="call-bar" id="cb-${code}"></div>
+      <div class="card-body">
+        <div class="city-tag">${code} · ${role}</div>
+        <div class="city-name">${a.city}</div>
+        <div class="clock-row">
+          <div class="city-time" id="t-${code}">--:--</div>
+          <div class="call-inline" id="ci-${code}">--</div>
+        </div>
+        <div class="city-date" id="d-${code}">--</div>
+        <div class="tz-diff" id="tz-${code}" style="font-size:11px;color:#888780;margin-bottom:6px"></div>
+        <div class="wx-row">
+          <span id="wi-${code}" style="font-size:17px">⏳</span>
+          <span class="wx-temp" id="wt-${code}">--</span>
+          <span class="wx-desc" id="wd-${code}">加载中</span>
+        </div>
+        <div class="outfit-tip" id="ot-${code}" style="color:#888780">正在获取天气...</div>
+        <div class="divider"></div>
+        <div class="info-row"><span class="info-label">警察</span><span class="emerg-val" id="ep-${code}">${emerg(a.cc).p}</span></div>
+        <div class="info-row"><span class="info-label">救护</span><span class="emerg-val" id="ea-${code}">${emerg(a.cc).a}</span></div>
+        <div class="info-row"><span class="info-label">货币</span><span class="info-val">${a.ccy}</span></div>
+        <div class="info-row"><span class="info-label" id="fxlbl-${code}">汇率</span><span class="info-val" id="fx-${code}">加载中...</span></div>
+      </div>
+    </div>`;
+  });
+
+  // 进度条
+  document.getElementById('route-label').textContent=stops.join(' → ');
+  document.getElementById('prog-note').textContent=t.mockMode?'· 测试模式，手动拖动':'· 根据航班时间自动推进';
+  const nr=document.getElementById('nodes-row');
+  const nl=document.getElementById('node-labels');
+  nr.innerHTML='';nl.innerHTML='';
+  stops.forEach((code,i)=>{
+    const d=document.createElement('div');
+    d.className='nd'+(i===0?' done':'');d.id='nd-'+i;d.textContent=code.slice(0,2);nr.appendChild(d);
+    const l=document.createElement('span');l.className='nl';
+    l.innerHTML=`${code}<br><span style="font-size:9px">${AP[code].city}</span>`;
+    nl.appendChild(l);
+  });
+  document.getElementById('s-dist').textContent=calcDist(stops).toLocaleString()+' km';
+
+  // 提示卡
+  const tw=document.getElementById('tips-wrap');
+  tw.style.gridTemplateColumns=`repeat(${Math.min(n,3)},1fr)`;
+  tw.innerHTML='';
+  stops.forEach((code,i)=>{
+    const role=i===0?'家人/出发地':i===n-1?'目的地':AP[code].city+'·中转';
+    tw.innerHTML+=`<div class="tip-card"><div class="tip-city">${code} · ${role}</div><div class="tip-text" id="tip-${code}">--</div></div>`;
+  });
+
+  setProgress(0);
+}
+
+function calcDist(stops){
+  let d=0;
+  for(let i=0;i<stops.length-1;i++){
+    const a=AP[stops[i]],b=AP[stops[i+1]];if(!a||!b)continue;
+    const R=6371,f1=a.lat*Math.PI/180,f2=b.lat*Math.PI/180,
+      df=(b.lat-a.lat)*Math.PI/180,dl=(b.lng-a.lng)*Math.PI/180,
+      x=Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2;
+    d+=R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+  }
+  return Math.round(d/100)*100;
+}
+
+// ══════════════════════════════════════
+// 时钟 + 跨日检测
+// ══════════════════════════════════════
+function localH(tz){return +new Date().toLocaleString('en',{timeZone:tz,hour:'numeric',hour12:false});}
+function localDate(tz){return new Date().toLocaleDateString('en-CA',{timeZone:tz});}
+
+function callStatus(h){
+  // 08:00–22:59 适合联络 | 23:00–02:59 深夜 | 03:00–07:59 凌晨
+  if(h>=8&&h<=22)return['ok','📞 适合联络'];
+  if(h>=23||h<=2)return['no','🌙 深夜，可能入睡'];
+  return['warn','💤 凌晨，可能入睡'];
+}
+
+function updateClocks(){
+  const stops=C().stops, now=new Date();
+  const baseDate=localDate(AP[stops[0]]?.tz||'UTC');
+  stops.forEach(code=>{
+    const a=AP[code];if(!a)return;
+    const tel=document.getElementById('t-'+code);if(!tel)return;
+    tel.textContent=now.toLocaleTimeString('zh-HK',{timeZone:a.tz,hour:'2-digit',minute:'2-digit',hour12:false});
+    const dateStr=now.toLocaleDateString('zh-HK',{timeZone:a.tz,month:'short',day:'numeric',weekday:'short'});
+    const thisDate=localDate(a.tz);
+    const diffDays=Math.round((new Date(thisDate)-new Date(baseDate))/(1000*3600*24));
+    let dateLine=dateStr;
+    if(diffDays!==0){
+      const tag=diffDays>0?`+${diffDays}天`:`${diffDays}天`;
+      dateLine+=` <span class="day-diff">${tag}</span>`;
+    }
+    document.getElementById('d-'+code).innerHTML=dateLine;
+
+    // 时差（相对出发地）
+    const tzEl=document.getElementById('tz-'+code);
+    if(tzEl){
+      const cityIdx=stops.indexOf(code);
+      if(cityIdx===0){
+        tzEl.textContent='出发地';
+      } else {
+        const baseH=localH(AP[stops[0]].tz);
+        const thisH=localH(a.tz);
+        let diff=thisH-baseH;
+        if(diff>12)diff-=24;
+        if(diff<-12)diff+=24;
+        const sign=diff>=0?'+':'';
+        tzEl.textContent=`与${AP[stops[0]].city}时差 ${sign}${diff}h`;
+      }
+    }
+    const h=localH(a.tz);
+    const[cls,txt]=callStatus(h);
+    const cb=document.getElementById('cb-'+code);
+    const ci=document.getElementById('ci-'+code);
+    if(cb)cb.className='call-bar '+cls;
+    if(ci){ci.className='call-inline '+cls;ci.textContent=txt;}
+  });
+}
+
+// ══════════════════════════════════════
+// 天气
+// ══════════════════════════════════════
+async function fetchWeather(){
+  for(const code of C().stops){
+    const a=AP[code];if(!a)continue;
+    if(wxCache[code]&&Date.now()-wxCache[code].ts<CACHE){renderWx(code,wxCache[code]);continue;}
+    try{
+      const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${a.lat}&longitude=${a.lng}&current=temperature_2m,weathercode&timezone=${encodeURIComponent(a.tz)}`);
+      const d=await r.json();
+      const cur=d.current;
+      const data={temp:Math.round(cur.temperature_2m),code:cur.weathercode,ts:Date.now()};
+      wxCache[code]=data;renderWx(code,data);
+    }catch(e){const el=document.getElementById('wd-'+code);if(el)el.textContent='暂无';}
+  }
+  const b=document.getElementById('src-wx');b.textContent='🌤 Open-Meteo';b.className='src-badge';
+}
+function renderWx(code,d){
+  const wi=document.getElementById('wi-'+code);if(!wi)return;
+  document.getElementById('wi-'+code).textContent=wxIcon(d.code);
+  document.getElementById('wt-'+code).textContent=d.temp+'°C';
+  document.getElementById('wd-'+code).textContent=wxDesc(d.code);
+  const ot=document.getElementById('ot-'+code);
+  ot.textContent=outfitTip(d.temp,d.code);ot.style.color='';
+  updateTip(code);
+}
+
+// ══════════════════════════════════════
+// 汇率（目的地货币→基准货币方向）
+// ══════════════════════════════════════
+async function fetchFX(){
+  const base=C().baseCcy;
+  if(Date.now()-fxTime<CACHE&&Object.keys(fxCache).length){renderFX();return;}
+  try{
+    const r=await fetch(`https://api.exchangerate-api.com/v4/latest/${base}`);
+    const d=await r.json();
+    fxCache=d.rates||{};fxTime=Date.now();
+    const b=document.getElementById('src-fx');b.textContent='💱 实时汇率';b.className='src-badge';
+  }catch(e){
+    const b=document.getElementById('src-fx');b.textContent='💱 汇率（离线）';b.className='src-badge fallback';
+  }
+  renderFX();
+}
+function renderFX(){
+  const base=C().baseCcy;
+  C().stops.forEach(code=>{
+    const a=AP[code];if(!a)return;
+    const el=document.getElementById('fx-'+code);
+    const lbl=document.getElementById('fxlbl-'+code);
+    if(!el)return;
+    const tgt=a.ccy;
+    if(tgt===base){el.textContent='本地货币';if(lbl)lbl.textContent='货币';return;}
+    // 方向：目的地货币 → 基准货币
+    // fxCache is base→others, so 1 tgt = (1/rate[tgt]) base
+    const rate=fxCache[tgt];
+    if(rate){
+      const inv=(1/rate);
+      const fmt=inv>=100?inv.toFixed(0):inv>=10?inv.toFixed(1):inv.toFixed(2);
+      el.textContent=`1 ${tgt} = ${fmt} ${base}`;
+      if(lbl)lbl.textContent='消费参考';
+    }else{el.textContent='--';}
+  });
+}
+
+// ══════════════════════════════════════
+// 航班
+// ══════════════════════════════════════
+async function fetchFlight(){
+  const t=C();
+  if(t.mockMode){renderProgressMock();return;}
+  const flt=t.flights[0],date=t.dates[0];
+  if(!flt){renderProgressMock();return;}
+
+  const b=document.getElementById('src-flight');
+  b.textContent='✈ 查询中...';b.className='src-badge mock';
+
+  let ok=false;
+
+  // AviationStack：本地file://直接调HTTP，不需要代理
+  if(t.avKey){
+    try{
+      const qs=new URLSearchParams({access_key:t.avKey,flight_iata:flt,limit:1});
+      if(date)qs.set('flight_date',date);
+      const r=await fetch(`http://api.aviationstack.com/v1/flights?${qs}`);
+      if(r.ok){
+        const d=await r.json();
+        if(d.data&&d.data.length){
+          b.textContent='✈ AviationStack';b.className='src-badge';
+          renderProgressReal(d.data[0]);ok=true;
+        }else if(d.error){
+          console.warn('AviationStack:',d.error.message||d.error.type);
+        }
+      }
+    }catch(e){console.warn('AviationStack failed:',e);}
+  }
+
+  // OpenSky 兜底：查询航班号对应的实时状态
+  // 用 /flights/all 按时间段查，credentials:'omit' 解决 null-origin CORS 问题
+  if(!ok){
+    try{
+      const nowSec=Math.floor(Date.now()/1000);
+      // 往前查8小时，覆盖长途航班
+      const begin=nowSec-8*3600;
+      // OpenSky 把航班号存在 callsign 字段（去空格后匹配）
+      // 用出发地机场 icao 过滤减少数据量
+      const orig=AP[t.stops[0]];
+      let osUrl=`https://opensky-network.org/api/flights/departure?airport=${orig?.icao||'VHHH'}&begin=${begin}&end=${nowSec}`;
+      const r=await fetch(osUrl,{credentials:'omit'});
+      if(r.ok){
+        const d=await r.json();
+        const prefix=flt.replace(/\s/g,'').toUpperCase();
+        const match=Array.isArray(d)&&d.find(f=>
+          f.callsign&&f.callsign.trim().toUpperCase()===prefix
+        );
+        if(match){
+          b.textContent='✈ OpenSky（兜底）';b.className='src-badge fallback';
+          // 用 OpenSky 的起飞/落地时间戳计算进度
+          const depUtc=(match.firstSeen||match.lastSeen)*1000;
+          // OpenSky 不提供预计落地，用总里程/速度估算落地时间
+          const totalMs=(calcDist(t.stops)/850)*3600000;
+          const pct=Math.max(0,Math.min(100,Math.round((Date.now()-depUtc)/totalMs*100)));
+          document.getElementById('slider').value=pct;
+          setProgress(pct);
+          document.getElementById('flt-detail').style.display='flex';
+          const depT=new Date(depUtc);
+          const tz0=AP[t.stops[0]]?.tz;
+          document.getElementById('fi-dep').textContent=' '+depT.toLocaleTimeString('zh',{timeZone:tz0,hour:'2-digit',minute:'2-digit'})+'（实际）';
+          document.getElementById('fi-arr').textContent=' 估算中';
+          document.getElementById('fi-dly').textContent=' --';
+          document.getElementById('fi-dur').textContent=' 估算中';
+          const remMs=Math.max(0,depUtc+totalMs-Date.now());
+          const rh=Math.floor(remMs/3600000),rm=Math.round((remMs%3600000)/60000);
+          b.textContent=`✈ OpenSky · 剩${rh>0?rh+'小时':''}${rm}分`;
+          ok=true;
+        }
+      }
+    }catch(e){console.warn('OpenSky failed:',e);}
+  }
+
+  // 最终降级：按航班时刻表估算
+  // 用出发日期 + 已知的常用航班出发时刻做合理估算
+  if(!ok&&date&&flt){
+    b.textContent='✈ 时刻估算';b.className='src-badge fallback';
+    renderProgressBySchedule(flt,date,t.stops);
+    ok=true;
+  }
+  if(!ok){b.textContent='✈ 无法查询';b.className='src-badge fallback';renderProgressMock();}
+}
+
+// 已知航班时刻表（本地出发时间 + 飞行时长）
+// depTz: 出发城市时区；depH/depM: 当地出发时刻；durH: 飞行小时数
+const SCHED={
+  TK71: {depTz:'Asia/Hong_Kong',   depH:23,depM:55,durH:12},
+  TK758:{depTz:'Asia/Hong_Kong',   depH:23,depM:55,durH:12},
+  TK15: {depTz:'Europe/Istanbul',  depH: 2,depM:20,durH:14},
+  TK77: {depTz:'Europe/Istanbul',  depH: 2,depM: 0,durH:14},
+};
+
+// 把"某时区的某日 HH:MM"转成UTC毫秒时间戳
+function localToUtcMs(dateStr, h, m, tz){
+  // 构造一个该时区当天的ISO串，让浏览器解析
+  // 方法：取该日期在该时区的午夜UTC偏移，再加上时分
+  const noon = new Date(`${dateStr}T12:00:00Z`); // 随便一个参考点
+  const localNoonStr = noon.toLocaleString('en-CA',{timeZone:tz,hour12:false,
+    year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  // en-CA格式: "YYYY-MM-DD, HH:MM:SS"
+  const localNoonDate = localNoonStr.split(',')[0].trim(); // "YYYY-MM-DD"
+  // 找到该时区当天00:00对应的UTC
+  const midnightGuess = new Date(`${localNoonDate}T00:00:00Z`);
+  // 修正时区偏移：在该时区里，midnightGuess对应的本地时间
+  const checkStr = midnightGuess.toLocaleString('en-CA',{timeZone:tz,hour12:false,
+    year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const checkHour = parseInt(checkStr.split(',')[1]?.trim()?.split(':')[0]||'0');
+  // checkHour是midnightGuess在该时区显示的小时，偏移修正
+  const midnightUtcMs = midnightGuess.getTime() - checkHour*3600000;
+  return midnightUtcMs + h*3600000 + m*60000;
+}
+
+function renderProgressBySchedule(flt, dateStr, stops){
+  const t = C();
+  const flts = t.flights;   // [leg1, leg2]
+  const dates = t.dates;    // [date1, date2]
+  const now = Date.now();
+
+  // 建立各段的 {depUtc, arrUtc}
+  const legs = [];
+  for(let i=0; i<flts.length; i++){
+    const f=flts[i], d=dates[i]||dates[0];
+    if(!f||!d) continue;
+    const sc=SCHED[f];
+    const depTz = sc ? sc.depTz : (AP[stops[i]]?.tz||'UTC');
+    const depH  = sc ? sc.depH  : 12;
+    const depM  = sc ? sc.depM  : 0;
+    const durMs = sc ? sc.durH*3600000 : (calcDist([stops[i],stops[i+1]])/850)*3600000;
+    const depUtc = localToUtcMs(d, depH, depM, depTz);
+    legs.push({depUtc, arrUtc: depUtc+durMs, from:stops[i], to:stops[i+1]});
+  }
+
+  if(!legs.length){renderProgressMock();return;}
+
+  const tripStart = legs[0].depUtc;
+  const tripEnd   = legs[legs.length-1].arrUtc;
+  const totalMs   = tripEnd - tripStart;
+  const elapsed   = now - tripStart;
+  const pct       = Math.max(0, Math.min(100, Math.round(elapsed/totalMs*100)));
+
+  document.getElementById('slider').value = pct;
+  setProgress(pct);
+  document.getElementById('flt-detail').style.display = 'none';
+
+  // 在右上角显示当前所在段信息
+  const b = document.getElementById('src-flight');
+  const curLeg = legs.find(l=> now>=l.depUtc && now<l.arrUtc);
+  if(curLeg){
+    const remMin = Math.round((curLeg.arrUtc-now)/60000);
+    const remH=Math.floor(remMin/60), remM=remMin%60;
+    const remStr=remH>0?`${remH}小时${remM>0?remM+'分':''}`:remMin+'分';
+    b.textContent=`✈ 时刻估算 · 飞行中 剩${remStr}`;
+  } else if(now<tripStart){
+    const minToGo=Math.round((tripStart-now)/60000);
+    b.textContent=`✈ 时刻估算 · 出发前${minToGo}分`;
+  } else {
+    b.textContent='✈ 时刻估算 · 已落地';
+  }
+  b.className='src-badge fallback';
+}
+function renderProgressReal(data){
+  const dep=data.departure, arr=data.arrival;
+  // 优先用实际起飞时间，其次预计，最后计划
+  const depT=new Date(dep.actual||dep.estimated||dep.scheduled);
+  // 优先用实际落地，其次实时预计（含当天风速/航路修正），最后计划
+  const arrT=new Date(arr.actual||arr.estimated||arr.scheduled);
+  const now=Date.now();
+  const total=arrT-depT;
+  const elapsed=now-depT;
+  const pct=Math.max(0,Math.min(100,Math.round(elapsed/total*100)));
+  document.getElementById('slider').value=pct;
+  setProgress(pct);
+
+  // 详情行
+  document.getElementById('flt-detail').style.display='flex';
+  const tz0=AP[C().stops[0]]?.tz;
+  const tzN=AP[C().stops[C().stops.length-1]]?.tz;
+  document.getElementById('fi-dep').textContent=' '+depT.toLocaleTimeString('zh',{timeZone:tz0,hour:'2-digit',minute:'2-digit'});
+  document.getElementById('fi-arr').textContent=' '+arrT.toLocaleTimeString('zh',{timeZone:tzN,hour:'2-digit',minute:'2-digit'})
+    +(arr.actual?'（已落地）':arr.estimated?' ★预计':'');
+  const dly=dep.delay||0;
+  document.getElementById('fi-dly').textContent=' '+(dly>0?'+'+dly+'分钟':'准点');
+  document.getElementById('fi-dly-wrap').className='fi'+(dly>15?' delay':'');
+  const durH=Math.floor(total/3600000), durM=Math.round((total%3600000)/60000);
+  document.getElementById('fi-dur').textContent=` ${durH}h${durM>0?durM+'m':''}（实际）`;
+
+  // 右上角徽章：显示剩余时间
+  const b=document.getElementById('src-flight');
+  if(now<arrT){
+    const remMs=arrT-now;
+    const rh=Math.floor(remMs/3600000), rm=Math.round((remMs%3600000)/60000);
+    const remStr=rh>0?`${rh}小时${rm>0?rm+'分':''}`:rm+'分钟';
+    b.textContent=`✈ AviationStack · 剩${remStr}`;
+  } else {
+    b.textContent='✈ AviationStack · 已落地';
+  }
+  b.className='src-badge';
+}
+
+// ══════════════════════════════════════
+// 进度条
+// ══════════════════════════════════════
+function renderProgressMock(){document.getElementById('slider').value=0;setProgress(0);}
+
+function setProgress(v){
+  const pct=+v, stops=C().stops, n=stops.length;
+  document.getElementById('tfill').style.width=pct+'%';
+  const seg=100/(n-1);
+  stops.forEach((_,i)=>{const nd=document.getElementById('nd-'+i);if(nd)nd.className='nd'+(pct>=i*seg?' done':'');});
+  stops.forEach(c=>document.getElementById('card-'+c)?.classList.remove('active'));
+  const si=Math.min(Math.floor(pct/seg),n-2);
+  const sp=(pct-si*seg)/(seg);
+  const from=stops[si],to=stops[si+1];
+  if(pct>=100)document.getElementById('card-'+stops[n-1])?.classList.add('active');
+  else if(pct===0)document.getElementById('card-'+stops[0])?.classList.add('active');
+  else document.getElementById('card-'+to)?.classList.add('active');
+
+  const totalH=calcDist(stops)/850;
+  const flownH=+(totalH*pct/100).toFixed(1);
+  const remH=+(totalH*(1-pct/100)).toFixed(1);
+  document.getElementById('s-stage').textContent=pct===0?'出发前':pct>=100?'已抵达':`${from}→${to}`;
+  document.getElementById('s-flown').textContent=flownH+'h';
+  document.getElementById('s-remain').textContent=pct>=100?'已抵达':'~'+remH+'h';
+  document.getElementById('leg-label').textContent=pct===0?'尚未出发':pct>=100?'旅程完成 ✓':`${from}→${to}  ${Math.round(sp*100)}%`;
+  stops.forEach(c=>updateTip(c,pct,si,sp));
+}
+
+function updateTip(code,pct,si,sp){
+  const el=document.getElementById('tip-'+code);if(!el)return;
+  const stops=C().stops,n=stops.length,idx=stops.indexOf(code);
+  const wx=wxCache[code];
+  const wxStr=wx?`当地${wx.temp}°C，${wxDesc(wx.code)}`:'';
+  const h=wx?localH(AP[code]?.tz||'UTC'):-1;
+  const timeCtx=h>=23||h<=2?'深夜，提醒注意休息':h>=3&&h<=7?'凌晨，注意休息等候':'';
+  let txt='';
+  if(pct===undefined||pct===0){
+    txt=idx===0?`旅程尚未开始。${wxStr}`:idx===n-1?`等待旅行者到来。${wxStr}`:wxStr||'中转准备中';
+  }else if(pct>=100){
+    txt=idx===n-1?`旅行者已安全抵达！${wxStr}。祝旅途愉快 🎉`:'旅程已完成';
+  }else{
+    const from=stops[si],to=stops[si+1];
+    if(code===from) txt=`此站已完成。${wxStr}`;
+    else if(code===to){
+      const pctStr=Math.round((sp||0)*100)+'%';
+      txt=timeCtx
+        ?`即将抵达，进度${pctStr}。${wxStr}。${timeCtx}`
+        :`即将抵达，进度${pctStr}。${wxStr}`;
+    }
+    else if(idx<si) txt=`此站已完成。${wxStr}`;
+    else txt=`等待旅行者。${wxStr}`;
+  }
+  el.textContent=txt||'--';
+}
+
+// ══════════════════════════════════════
+// 汇总请求
+// ══════════════════════════════════════
+async function fetchAll(){await Promise.all([fetchWeather(),fetchFX()]);fetchFlight();updateClocks();}
+
+// ══════════════════════════════════════
+// 初始化
+// ══════════════════════════════════════
+loadLocal();
+if(!TRIPS[0].label)TRIPS[0].label='去程';
+if(TRIPS.length<2){TRIPS.push({...JSON.parse(JSON.stringify(BLANK_TRIP)),label:'回程',stops:['GRU','IST','HKG']});}
+renderTabs();loadSettingsToUI();buildUI();fetchAll();
+document.getElementById('slider').addEventListener('input',e=>setProgress(+e.target.value));
+setInterval(updateClocks,60000);
+setInterval(()=>{wxCache={};fxCache={};fxTime=0;fetchAll();},CACHE);
+</script>
+</body>
+</html>
