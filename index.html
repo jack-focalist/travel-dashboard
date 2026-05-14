@@ -137,7 +137,7 @@ input[type=range]{width:100%;height:22px;opacity:0;cursor:pointer;position:relat
 
 <div class="trip-tabs" id="trip-tabs"></div>
 
-<div class="settings" id="settings-panel">
+<div class="settings" id="settings-panel" style="display:block">
   <div class="sg">
     <div class="field"><label>出发地 IATA</label>
       <div class="acw"><input id="s0" placeholder="如 HKG" maxlength="3" oninput="acIn('s0',this.value)" autocomplete="off"><div class="acd" id="ac-s0"></div></div></div>
@@ -364,7 +364,8 @@ document.addEventListener('click',e=>{if(!e.target.closest('.acw'))document.quer
 // ══════════════════════════════════
 function toggleSettings(){
   const p=document.getElementById('settings-panel');
-  p.style.display=p.style.display==='none'||!p.style.display?'block':'none';
+  const isHidden=p.style.display===''||p.style.display==='none';
+  p.style.display=isHidden?'block':'none';
 }
 function loadSettingsUI(){
   const t=C(),s=t.stops;
@@ -963,7 +964,7 @@ function renderProgress(){
   else document.getElementById('card-'+stops[si+1])?.classList.add('active');
   const totalH=calcDist(stops)/850;
   document.getElementById('s-flown').textContent=+(totalH*v/100).toFixed(1)+'h';
-  document.getElementById('s-remain').textContent=v>=100?'已抵达':'~'++(totalH*(1-v/100)).toFixed(1)+'h';
+  document.getElementById('s-remain').textContent=v>=100?'已抵达':'~'+(totalH*(1-v/100)).toFixed(1)+'h';
   document.getElementById('leg-status').textContent=v===0?'尚未出发':v>=100?'旅程完成 ✓':`第${si+1}段 ${Math.round(sp*100)}%`;
   stops.forEach(code=>updateTip(code,v,si,[]));
 }
@@ -993,10 +994,18 @@ function setBadge(id,txt,cls){const el=document.getElementById(id);if(el){el.tex
 // ══════════════════════════════════
 // 初始化
 // ══════════════════════════════════
-loadLocal();
-if(!TRIPS[0])TRIPS=[JSON.parse(JSON.stringify(BLANK))];
-renderTabs();loadSettingsUI();buildUI();
-updateClocks();fetchWx();fetchFx();scheduleRefresh();
+try{loadLocal();}catch(e){TRIPS=[JSON.parse(JSON.stringify(BLANK))];}
+// 确保每个行程都有完整字段
+TRIPS=TRIPS.map(t=>Object.assign(JSON.parse(JSON.stringify(BLANK)),t));
+if(!TRIPS.length)TRIPS=[JSON.parse(JSON.stringify(BLANK))];
+activeTrip=0;
+renderTabs();
+loadSettingsUI();
+buildUI();
+updateClocks();
+fetchWx();
+fetchFx();
+scheduleRefresh();
 document.getElementById('slider').addEventListener('input',()=>{if(C().mockMode)renderProgress();});
 setInterval(updateClocks,60000);
 setInterval(()=>{wxCache={};fxCache={};fxTime=0;fetchWx();fetchFx();},WX_TTL);
