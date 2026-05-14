@@ -50,7 +50,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sl{font-size:11px;color:#888780;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;margin-top:1.25rem}
 
 /* 城市卡片 */
-.cities{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+/* 城市卡片自适应宽度 */
+.cities{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
 .cc{background:#fff;border:0.5px solid rgba(0,0,0,0.11);border-radius:14px;overflow:hidden;transition:box-shadow .2s}
 .cc.active{box-shadow:0 0 0 1.5px #378ADD}
 .cbar{height:5px;width:100%;transition:background .4s}
@@ -101,9 +102,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .nd{width:22px;height:22px;border-radius:50%;border:2px solid #378ADD;background:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:#378ADD;transition:all .3s}
 .nd.done{background:#378ADD;color:#fff}
 .node-labels{display:flex;justify-content:space-between;margin-top:6px}
-.nl{font-size:10px;color:#888780;line-height:1.5;text-align:left}
+.nl{font-size:10px;color:#888780;line-height:1.6;text-align:left;max-width:90px}
 .nl:nth-child(2){text-align:center}
 .nl:last-child{text-align:right}
+.nl .nl-times{display:grid;grid-template-columns:1fr 1fr;gap:0 6px;margin-top:2px;font-size:10px}
+.nl .nl-arr{color:#639922}
+.nl .nl-dep{color:#185FA5}
 input[type=range]{width:100%;height:22px;opacity:0;cursor:pointer;position:relative;z-index:2;margin:-11px 0 0;display:block}
 
 /* 统计行 */
@@ -321,15 +325,20 @@ let fltCache={};   // {legKey: {data, ts, src}}
 let refreshTimer=null;
 
 function C(){return TRIPS[activeTrip];}
+function hhmm(ms){
+  if(!ms||isNaN(ms)||ms<=0)return'--';
+  const h=Math.floor(ms/3600000),m=Math.round((ms%3600000)/60000);
+  return`${h}h${m>0?m+'m':''}`;
+}
 function fmtHM(localStr){
-  // AviationStack/AeroDataBox local time string: "2026-05-13 17:45-03:00" or "2026-05-13T17:45:00+03:00"
+  if(!localStr)return'--:--';
   const m=localStr.match(/T?(\d{2}:\d{2})/);
   return m?m[1]:'--:--';
 }
 function fmtDate(localStr){
-  // 取日期部分
+  if(!localStr)return'';
   const m=localStr.match(/(\d{4}-\d{2}-\d{2})/);
-  if(!m)return '';
+  if(!m)return'';
   const d=new Date(m[1]+'T12:00:00Z');
   return d.toLocaleDateString('zh-CN',{month:'short',day:'numeric'});
 }
@@ -487,7 +496,7 @@ function buildUI(){
   const tw=document.getElementById('tips-wrap');
   tw.style.gridTemplateColumns=`repeat(${Math.min(n,3)},1fr)`;tw.innerHTML='';
   stops.forEach((code,i)=>{
-    const role=i===0?'家人/出发地':i===n-1?'目的地':AP[code].city+'·中转';
+    const role=i===0?'出发地':i===n-1?'目的地':AP[code].city+'·中转';
     tw.innerHTML+=`<div class="tip-card"><div class="tip-city">${code} · ${role}</div><div class="tip-text" id="tip-${code}">--</div></div>`;
   });
 
@@ -873,15 +882,8 @@ function renderProgressFromData(fltData){
     if(info.state==='done'&&info.depUtc&&info.arrUtc)flownMs+=info.arrUtc-info.depUtc;
     else if(info.state==='active'&&info.depUtc)flownMs+=now-info.depUtc;
   });
-  const flownH=flownMs>0?(flownMs/3600000).toFixed(1):'0';
-  // 全程剩余：未完成段的预计时长
-  let remMs=0;
-  legInfos.forEach(info=>{
-    if(info.state==='active'&&info.arrUtc)remMs+=info.arrUtc-now;
-    else if(info.state==='pending'&&info.depUtc&&info.arrUtc)remMs+=info.arrUtc-info.depUtc;
-    else if(info.state==='pending'&&!info.arrUtc)remMs+=13*3600*1000; // 估算
-  });
-  const remH=remMs>0?'~'+(remMs/3600000).toFixed(1)+'h':(totalPct>=100?'已抵达':'~'+totalEstH.toFixed(0)+'h');
+  const flownH=hhmm(flownMs);
+  const remH=remMs>0?'~'+hhmm(remMs):(totalPct>=100?'已抵达':'~'+hhmm(totalEstH*3600000));
   document.getElementById('s-flown').textContent=flownH+'h';
   document.getElementById('s-remain').textContent=remH;
 
@@ -990,8 +992,8 @@ function renderLegsDetail(legInfos,fltData){
       <div class="leg-label">第${i+1}段</div>
       <div class="leg-info">
         <span class="${stateClass}">${stateLabel}</span> · ${fltNum} · ${depCode}→${arrCode}${remStr}<br>
-        出发 <b>${depHM}</b>${depDate?' '+depDate:''} · 落地 <b>${arrHM}${arrDate?' '+arrDate:''}</b>${d?.src&&d.src.includes('AviationStack')&&info.arrStr?'★预计':''}
-        ${durStr?` · 飞行时长 ${durStr}`:''}${delay!==undefined&&delay!==null?' · 延误 '+delayStr:''}
+        出发 <b>${fmtHM(info.depStr)}</b>${info.depStr?' '+fmtDate(info.depStr):''} · 落地 <b>${fmtHM(info.arrStr)}${info.arrStr?' '+fmtDate(info.arrStr):''}</b>${info.d?.src?.includes('AviationStack')&&info.arrStr?' ★预计':''}<br>
+        ${durStr}${delay!==undefined&&delay!==null?' · '+delayStr:''}
       </div>
     </div>`;
   });
