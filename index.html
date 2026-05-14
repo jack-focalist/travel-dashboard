@@ -165,7 +165,7 @@ input[type=range]{width:100%;height:22px;opacity:0;cursor:pointer;position:relat
   <div class="sa">
     <button class="btn-p" onclick="applySettings()">确认并刷新</button>
     <button class="btn" id="btn-share" onclick="copyShareUrl()">🔗 生成分享链接</button>
-    <span class="snote">Key 仅存本地，分享链接不含 Key</span>
+    <span class="snote">⚠ 分享链接含 API Key，请谨慎分享对象</span>
   </div>
 </div>
 
@@ -328,6 +328,8 @@ function makeShareUrl(){
   t.dates.forEach((d,i)=>{if(d)p.set('d'+i,d);});
   if(t.tzRef)p.set('tz',t.tzRef);
   if(t.baseCcy)p.set('ccy',t.baseCcy);
+  if(t.avKey)p.set('avk',t.avKey);
+  if(t.adbKey)p.set('adbk',t.adbKey);
   return location.origin+location.pathname+'?'+p.toString();
 }
 function copyShareUrl(){
@@ -358,6 +360,8 @@ function loadFromUrl(){
   t.dates=[p.get('d0')||'',p.get('d1')||''];
   t.tzRef=p.get('tz')||'Asia/Hong_Kong';
   t.baseCcy=p.get('ccy')||'HKD';
+  if(p.get('avk'))t.avKey=p.get('avk');
+  if(p.get('adbk'))t.adbKey=p.get('adbk');
   return true;
 }
 
