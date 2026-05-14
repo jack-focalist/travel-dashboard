@@ -824,7 +824,7 @@ function renderProgressFromData(fltData){
   const segCount=n-1;
   const segSize=100/segCount;
 
-  let totalPct=0,currentLegIdx=-1,allDone=true;
+  let totalPct=0,currentLegIdx=-1,allDone=true,flownMs=0,remMs=0;
   const legInfos=[];
 
   for(let i=0;i<segCount;i++){
@@ -880,8 +880,7 @@ function renderProgressFromData(fltData){
     if(info.state==='done'&&info.depUtc&&info.arrUtc)flownMs+=info.arrUtc-info.depUtc;
     else if(info.state==='active'&&info.depUtc)flownMs+=now-info.depUtc;
   });
-  // 全程已飞：已完成段+当前段已飞
-  let flownMs=0,remMs=0;
+  // 全程已飞/剩余：已在顶部声明 flownMs/remMs
   legInfos.forEach(info=>{
     if(!info.depUtc||isNaN(info.depUtc))return;
     if(info.state==='done'&&info.arrUtc&&!isNaN(info.arrUtc))
