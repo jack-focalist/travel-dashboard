@@ -937,8 +937,10 @@ function renderLegsDetail(legInfos){
     }
     let durStr='';
     if(info.depUtc&&info.arrUtc&&!isNaN(info.depUtc)&&!isNaN(info.arrUtc)){
-      const hasActual=!!(info.d?.depActual&&info.d?.arrActual);
-      durStr=`飞行时长 ${hhmm(info.arrUtc-info.depUtc)}（${hasActual?'实际':'计划'}）`;
+      const depActual=info.d?.depIsActual!==false;
+      const arrActual=info.d?.arrIsActual!==false;
+      const label=depActual&&arrActual?'实际':depActual||arrActual?'部分实际':'计划';
+      durStr=`飞行时长 ${hhmm(info.arrUtc-info.depUtc)}（${label}）`;
     }
     const delay=info.d?.delay;
     const delayStr=delay>0
