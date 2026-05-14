@@ -417,8 +417,6 @@ function loadSettingsUI(){
   document.getElementById('d0').value=t.dates[0]||'';
   document.getElementById('f1').value=t.flights[1]||'';
   document.getElementById('d1').value=t.dates[1]||'';
-  document.getElementById('avk').value=t.avKey||'';
-  document.getElementById('adbk').value=t.adbKey||'';
   document.getElementById('s-apimode').value=t.apiMode||'free';
   document.getElementById('s-tzref').value=t.tzRef||'Asia/Hong_Kong';
   document.getElementById('s-ccy').value=t.baseCcy||'HKD';
@@ -436,8 +434,6 @@ function applySettings(){
     document.getElementById('f1').value.trim().toUpperCase()
   ];
   t.dates=[document.getElementById('d0').value, document.getElementById('d1').value];
-  t.avKey=document.getElementById('avk').value.trim();
-  t.adbKey=document.getElementById('adbk').value.trim();
   t.apiMode=document.getElementById('s-apimode').value;
   t.tzRef=document.getElementById('s-tzref').value;
   t.baseCcy=document.getElementById('s-ccy').value;
