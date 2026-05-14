@@ -101,13 +101,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .nodes-row{display:flex;justify-content:space-between;position:absolute;top:-9px;left:0;right:0;pointer-events:none}
 .nd{width:22px;height:22px;border-radius:50%;border:2px solid #378ADD;background:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:#378ADD;transition:all .3s}
 .nd.done{background:#378ADD;color:#fff}
-.node-labels{display:flex;justify-content:space-between;margin-top:6px}
-.nl{font-size:10px;color:#888780;line-height:1.6;text-align:left;max-width:90px}
+.nl{font-size:10px;color:#888780;line-height:1.6;text-align:left}
 .nl:nth-child(2){text-align:center}
 .nl:last-child{text-align:right}
-.nl .nl-times{display:grid;grid-template-columns:1fr 1fr;gap:0 6px;margin-top:2px;font-size:10px}
-.nl .nl-arr{color:#639922}
-.nl .nl-dep{color:#185FA5}
+.nl-arr{color:#639922;font-size:10px}
+.nl-dep{color:#185FA5;font-size:10px}
 input[type=range]{width:100%;height:22px;opacity:0;cursor:pointer;position:relative;z-index:2;margin:-11px 0 0;display:block}
 
 /* 统计行 */
@@ -882,10 +880,23 @@ function renderProgressFromData(fltData){
     if(info.state==='done'&&info.depUtc&&info.arrUtc)flownMs+=info.arrUtc-info.depUtc;
     else if(info.state==='active'&&info.depUtc)flownMs+=now-info.depUtc;
   });
-  const flownH=hhmm(flownMs);
-  const remH=remMs>0?'~'+hhmm(remMs):(totalPct>=100?'已抵达':'~'+hhmm(totalEstH*3600000));
-  document.getElementById('s-flown').textContent=flownH+'h';
-  document.getElementById('s-remain').textContent=remH;
+  // 全程已飞：已完成段+当前段已飞
+  let flownMs=0,remMs=0;
+  legInfos.forEach(info=>{
+    if(!info.depUtc||isNaN(info.depUtc))return;
+    if(info.state==='done'&&info.arrUtc&&!isNaN(info.arrUtc))
+      flownMs+=info.arrUtc-info.depUtc;
+    else if(info.state==='active'&&info.depUtc)
+      flownMs+=now-info.depUtc;
+    if(info.state==='active'&&info.arrUtc&&!isNaN(info.arrUtc))
+      remMs+=info.arrUtc-now;
+    else if(info.state==='pending'&&info.depUtc&&info.arrUtc&&!isNaN(info.arrUtc))
+      remMs+=info.arrUtc-info.depUtc;
+  });
+  const flownDisp=flownMs>0?hhmm(flownMs):'0h';
+  const remDisp=remMs>0?'~'+hhmm(remMs):(totalPct>=100?'已抵达':'~'+hhmm(totalEstH*3600000));
+  document.getElementById('s-flown').textContent=flownDisp;
+  document.getElementById('s-remain').textContent=remDisp;
 
   // 旅途提示：根据实际航段状态判断，不依赖总进度
   stops.forEach(code=>updateTip(code,totalPct,currentLegIdx,legInfos));
@@ -992,7 +1003,7 @@ function renderLegsDetail(legInfos,fltData){
       <div class="leg-label">第${i+1}段</div>
       <div class="leg-info">
         <span class="${stateClass}">${stateLabel}</span> · ${fltNum} · ${depCode}→${arrCode}${remStr}<br>
-        出发 <b>${fmtHM(info.depStr)}</b>${info.depStr?' '+fmtDate(info.depStr):''} · 落地 <b>${fmtHM(info.arrStr)}${info.arrStr?' '+fmtDate(info.arrStr):''}</b>${info.d?.src?.includes('AviationStack')&&info.arrStr?' ★预计':''}<br>
+        出发 <b>${fmtHM(info.depStr)}</b>${info.depStr?' '+fmtDate(info.depStr):''} · ${info.d?.src?.includes('AviationStack')&&info.arrStr?'★预计 ':''}落地 <b>${fmtHM(info.arrStr)}${info.arrStr?' '+fmtDate(info.arrStr):''}</b><br>
         ${durStr}${delay!==undefined&&delay!==null?' · '+delayStr:''}
       </div>
     </div>`;
@@ -1001,12 +1012,23 @@ function renderLegsDetail(legInfos,fltData){
 
 function updateLegStatus(legInfos,curIdx,allDone){
   const el=document.getElementById('leg-status');
-  if(allDone&&legInfos.length){el.textContent='旅程完成 ✓';el.className='badge green';}
-  else if(curIdx>=0){
+  if(allDone&&legInfos.length){
+    el.textContent='旅程完成 ✓';el.className='badge green';
+  } else if(curIdx>=0){
     const l=legInfos[curIdx];
     el.textContent=`第${curIdx+1}段飞行中 ${Math.round(l.pct*100)}%`;
     el.className='badge blue';
-  }else{el.textContent='尚未出发';el.className='badge gray';}
+  } else {
+    // 找第一个pending的段
+    const pi=legInfos.findIndex(l=>l.state==='pending');
+    if(pi>=0){
+      el.textContent=`第${pi+1}段 待出发`;
+      el.className='badge gray';
+    } else {
+      el.textContent='尚未出发';
+      el.className='badge gray';
+    }
+  }
 }
 
 function renderProgress(){
