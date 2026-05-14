@@ -7,8 +7,6 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh;padding:1.25rem}
-
-/* 顶栏 */
 .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
 .topbar h1{font-size:17px;font-weight:500}
 .topbar-right{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
@@ -20,16 +18,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn{font-size:12px;padding:5px 12px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;background:#fff;cursor:pointer;color:#1a1a18}
 .btn:hover{background:#f0efe9}
 .btn.on{background:#1a1a18;color:#fff;border-color:#1a1a18}
-
-/* 行程标签 */
 .trip-tabs{display:flex;gap:6px;margin-bottom:1rem;align-items:center;flex-wrap:wrap}
 .tab{font-size:12px;padding:5px 14px;border:0.5px solid rgba(0,0,0,0.18);border-radius:20px;cursor:pointer;background:#fff;color:#73726c}
 .tab.on{background:#1a1a18;color:#fff;border-color:#1a1a18}
 .tab-add{font-size:12px;padding:5px 10px;border:0.5px dashed rgba(0,0,0,0.2);border-radius:20px;cursor:pointer;background:transparent;color:#888780}
 .tab-add:hover{background:#f0efe9}
-
-/* 设置面板 */
-.settings{background:#fff;border:0.5px solid rgba(0,0,0,0.11);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1rem;display:none}
+.settings-panel{background:#fff;border:0.5px solid rgba(0,0,0,0.11);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1rem;display:block}
 .sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin-bottom:12px}
 .field label{font-size:11px;color:#888780;display:block;margin-bottom:3px}
 .field input,.field select{width:100%;font-size:13px;padding:6px 9px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;background:#fff;color:#1a1a18;outline:none}
@@ -45,12 +39,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-p{font-size:13px;padding:7px 16px;border:none;border-radius:8px;background:#1a1a18;color:#fff;cursor:pointer}
 .btn-p:hover{background:#333}
 .snote{font-size:11px;color:#b4b2a9;margin-left:auto}
-
-/* 段标签 */
 .sl{font-size:11px;color:#888780;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;margin-top:1.25rem}
-
-/* 城市卡片 */
-/* 城市卡片自适应宽度 */
 .cities{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
 .cc{background:#fff;border:0.5px solid rgba(0,0,0,0.11);border-radius:14px;overflow:hidden;transition:box-shadow .2s}
 .cc.active{box-shadow:0 0 0 1.5px #378ADD}
@@ -60,16 +49,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cbar.no{background:#E24B4A}
 .cb{padding:.9rem 1rem}
 .ctag{font-size:10px;font-weight:500;color:#888780;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1px}
-.cname{font-size:14px;font-weight:500;margin-bottom:6px}
+.cname{font-size:14px;font-weight:500;margin-bottom:6px;line-height:1.4}
+.cname small{font-size:11px;color:#888780;font-weight:400;display:block}
 .crow{display:flex;align-items:baseline;gap:8px;margin-bottom:2px}
 .ctime{font-size:30px;font-weight:500;line-height:1;letter-spacing:-.5px}
 .cpill{font-size:11px;font-weight:500;padding:2px 7px;border-radius:10px;white-space:nowrap}
 .cpill.ok{background:#EAF3DE;color:#3B6D11}
 .cpill.warn{background:#FAEEDA;color:#854F0B}
 .cpill.no{background:#FCEBEC;color:#A32D2D}
-.cdate{font-size:13px;color:#73726c;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.cdate{font-size:13px;color:#73726c;margin-bottom:3px;display:flex;align-items:center;gap:6px}
 .ddiff{font-size:11px;background:#FAEEDA;color:#854F0B;border-radius:6px;padding:1px 6px;font-weight:500}
-.ctzdiff{font-size:11px;color:#aaa8a0;margin-bottom:9px}
+.ctzdiff{font-size:11px;color:#73726c;margin-bottom:9px}
 .wxrow{display:flex;align-items:center;gap:6px;margin-bottom:5px}
 .wxtemp{font-size:15px;font-weight:500}
 .wxdesc{font-size:11px;color:#73726c}
@@ -79,48 +69,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .il{color:#888780}
 .iv{font-weight:500;font-size:12px}
 .ev{color:#A32D2D;font-weight:500;font-size:12px}
-
-/* 进度卡 */
 .prog-card{background:#fff;border:.5px solid rgba(0,0,0,0.11);border-radius:14px;padding:1rem 1.15rem;margin-top:4px}
 .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;flex-wrap:wrap;gap:6px}
 .rcodes{font-size:15px;font-weight:500}
-
-/* 航段详情 */
 .legs-detail{display:grid;gap:8px;margin-bottom:1rem}
 .leg-row{background:#f5f4f0;border-radius:10px;padding:.7rem 1rem;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start}
 .leg-label{font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:.05em;padding-top:1px}
-.leg-info{font-size:12px;color:#1a1a18;line-height:1.6}
+.leg-info{font-size:12px;color:#1a1a18;line-height:1.7}
 .leg-info .hi{color:#185FA5;font-weight:500}
 .leg-info .done{color:#639922;font-weight:500}
-.leg-info .warn{color:#854F0B;font-weight:500}
-
-/* 进度条 */
-.track-wrap{position:relative;margin:0 6px 2.4rem}
+.leg-info .warn-txt{color:#854F0B}
+.leg-info .delay-txt{color:#A32D2D}
+.track-wrap{position:relative;margin:0 6px 2.8rem}
 .track-bg{height:4px;background:#e8e7e2;border-radius:2px;position:relative}
 .track-fill{height:4px;border-radius:2px;background:#378ADD;position:absolute;left:0;top:0;transition:width .4s}
 .nodes-row{display:flex;justify-content:space-between;position:absolute;top:-9px;left:0;right:0;pointer-events:none}
 .nd{width:22px;height:22px;border-radius:50%;border:2px solid #378ADD;background:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:#378ADD;transition:all .3s}
 .nd.done{background:#378ADD;color:#fff}
+.node-labels{display:flex;justify-content:space-between;margin-top:6px}
 .nl{font-size:10px;color:#888780;line-height:1.6;text-align:left}
 .nl:nth-child(2){text-align:center}
 .nl:last-child{text-align:right}
-.nl-arr{color:#639922;font-size:10px}
-.nl-dep{color:#185FA5;font-size:10px}
+.nl-arr{color:#639922;font-size:10px;display:block}
+.nl-dep{color:#185FA5;font-size:10px;display:block}
 input[type=range]{width:100%;height:22px;opacity:0;cursor:pointer;position:relative;z-index:2;margin:-11px 0 0;display:block}
-
-/* 统计行 */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:10px;border-top:.5px solid rgba(0,0,0,0.08)}
 .stat{text-align:center}
 .stat-label{font-size:10px;color:#888780;margin-bottom:2px}
 .stat-val{font-size:13px;font-weight:500;color:#1a1a18}
 .stat-val.blue{color:#185FA5}
-
-/* 提示卡 */
-.tips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:4px}
 .tip-card{background:#f0efe9;border-radius:10px;padding:.8rem .95rem}
 .tip-city{font-size:10px;color:#888780;font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
 .tip-text{font-size:12px;color:#3d3d3a;line-height:1.55}
-
 .footer{font-size:11px;color:#b4b2a9;text-align:center;margin-top:1.5rem}
 </style>
 </head>
@@ -139,7 +120,7 @@ input[type=range]{width:100%;height:22px;opacity:0;cursor:pointer;position:relat
 
 <div class="trip-tabs" id="trip-tabs"></div>
 
-<div class="settings" id="settings-panel" style="display:block">
+<div class="settings-panel" id="settings-panel">
   <div class="sg">
     <div class="field"><label>出发地 IATA</label>
       <div class="acw"><input id="s0" placeholder="如 HKG" maxlength="3" oninput="acIn('s0',this.value)" autocomplete="off"><div class="acd" id="ac-s0"></div></div></div>
@@ -156,7 +137,7 @@ input[type=range]{width:100%;height:22px;opacity:0;cursor:pointer;position:relat
     <div class="field"><label>AviationStack Key</label><input id="avk" type="password" placeholder="免费100次/月"></div>
     <div class="field"><label>AeroDataBox Key（RapidAPI）</label><input id="adbk" type="password" placeholder="免费600units/月"></div>
     <div class="field"><label>API模式</label>
-      <select id="api-mode">
+      <select id="s-apimode">
         <option value="free">免费版（不传日期）</option>
         <option value="paid">付费版（传日期）</option>
       </select></div>
@@ -195,7 +176,7 @@ input[type=range]{width:100%;height:22px;opacity:0;cursor:pointer;position:relat
 <div class="prog-card">
   <div class="ph">
     <span class="rcodes" id="route-label">--</span>
-    <span class="badge blue" id="leg-status">--</span>
+    <span class="badge gray" id="leg-status">--</span>
   </div>
   <div class="legs-detail" id="legs-detail"></div>
   <div class="track-wrap">
@@ -215,13 +196,12 @@ input[type=range]{width:100%;height:22px;opacity:0;cursor:pointer;position:relat
 
 <p class="sl">旅途提示</p>
 <div class="tips" id="tips-wrap"></div>
-
 <div class="footer">V2.2 · 时钟每分钟更新 · 智能刷新航班数据</div>
 
 <script>
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 // 机场字典
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 const AP={
   HKG:{city:'香港',en:'Hong Kong',cc:'HK',tz:'Asia/Hong_Kong',lat:22.308,lng:113.915,ccy:'HKD',icao:'VHHH'},
   IST:{city:'伊斯坦布尔',en:'Istanbul',cc:'TR',tz:'Europe/Istanbul',lat:41.275,lng:28.752,ccy:'TRY',icao:'LTFM'},
@@ -276,28 +256,27 @@ const AP={
 };
 
 const EMERG={
-  HK:{p:'999',a:'999',f:'999'},TR:{p:'155',a:'112',f:'110'},BR:{p:'190',a:'192',f:'193'},
-  GB:{p:'999',a:'999',f:'999'},FR:{p:'17',a:'15',f:'18'},DE:{p:'110',a:'112',f:'112'},
-  NL:{p:'112',a:'112',f:'112'},AE:{p:'999',a:'998',f:'997'},SG:{p:'999',a:'995',f:'995'},
-  JP:{p:'110',a:'119',f:'119'},KR:{p:'112',a:'119',f:'119'},CN:{p:'110',a:'120',f:'119'},
-  AU:{p:'000',a:'000',f:'000'},US:{p:'911',a:'911',f:'911'},CA:{p:'911',a:'911',f:'911'},
-  QA:{p:'999',a:'999',f:'999'},IT:{p:'113',a:'118',f:'115'},ES:{p:'091',a:'112',f:'080'},
-  CH:{p:'117',a:'144',f:'118'},AT:{p:'133',a:'144',f:'122'},DK:{p:'114',a:'112',f:'112'},
-  SE:{p:'114',a:'112',f:'112'},FI:{p:'112',a:'112',f:'112'},PL:{p:'997',a:'999',f:'998'},
-  EG:{p:'122',a:'123',f:'180'},NZ:{p:'111',a:'111',f:'111'},BE:{p:'101',a:'100',f:'100'},
-  PT:{p:'112',a:'112',f:'112'},GR:{p:'100',a:'166',f:'199'},TH:{p:'191',a:'1669',f:'199'},
-  MY:{p:'999',a:'999',f:'994'},PH:{p:'911',a:'911',f:'911'},ID:{p:'110',a:'118',f:'113'},
-  IN:{p:'100',a:'108',f:'101'},MX:{p:'911',a:'911',f:'911'},ZA:{p:'10111',a:'10177',f:'999'},
-  KE:{p:'999',a:'999',f:'999'},ET:{p:'991',a:'907',f:'939'},
+  HK:{p:'999',a:'999'},TR:{p:'155',a:'112'},BR:{p:'190',a:'192'},
+  GB:{p:'999',a:'999'},FR:{p:'17',a:'15'},DE:{p:'110',a:'112'},
+  NL:{p:'112',a:'112'},AE:{p:'999',a:'998'},SG:{p:'999',a:'995'},
+  JP:{p:'110',a:'119'},KR:{p:'112',a:'119'},CN:{p:'110',a:'120'},
+  AU:{p:'000',a:'000'},US:{p:'911',a:'911'},CA:{p:'911',a:'911'},
+  QA:{p:'999',a:'999'},IT:{p:'113',a:'118'},ES:{p:'091',a:'112'},
+  CH:{p:'117',a:'144'},AT:{p:'133',a:'144'},DK:{p:'114',a:'112'},
+  SE:{p:'114',a:'112'},FI:{p:'112',a:'112'},PL:{p:'997',a:'999'},
+  EG:{p:'122',a:'123'},NZ:{p:'111',a:'111'},BE:{p:'101',a:'100'},
+  PT:{p:'112',a:'112'},GR:{p:'100',a:'166'},TH:{p:'191',a:'1669'},
+  MY:{p:'999',a:'999'},PH:{p:'911',a:'911'},ID:{p:'110',a:'118'},
+  IN:{p:'100',a:'108'},MX:{p:'911',a:'911'},ZA:{p:'10111',a:'10177'},
+  KE:{p:'999',a:'999'},ET:{p:'991',a:'907'},
 };
-const emerg=cc=>EMERG[cc]||{p:'112',a:'112',f:'112'};
+const getEmerg = cc => EMERG[cc] || {p:'112',a:'112'};
 
 // 天气
 const wxIcon=c=>c<=1?'☀️':c<=3?'⛅':c<=48?'🌫':c<=57?'🌦':c<=67?'🌧':c<=77?'🌨':c<=82?'🌧':'⛈';
 const wxDesc=c=>c<=1?'晴朗':c<=3?'多云':c<=48?'雾/霾':c<=57?'毛毛雨':c<=67?'有雨':c<=77?'降雪':c<=82?'阵雨':'雷暴';
 function outfitTip(t,c){
-  const r=c>=51;
-  const rain=s=>r?s+' +雨具☔':s;
+  const r=c>=51, rain=s=>r?s+' +雨具☔':s;
   if(t>=32)return rain('☀ 高温，短袖防晒');
   if(t>=28)return rain('👕 温热，短袖');
   if(t>=23)return rain('🧥 舒适，薄长袖');
@@ -305,45 +284,77 @@ function outfitTip(t,c){
   if(t>=13)return rain('🧣 凉爽，外套');
   if(t>= 8)return rain('🧤 寒凉，厚外套或轻薄羽绒');
   if(t>= 3)return rain('🧤 寒冷，羽绒服');
-  return rain('🥶 严寒，厚羽绒+手套帽子');
+  return rain('🥶 严寒，厚羽绒+手套');
 }
 
-// ══════════════════════════════════
+// 时间工具
+function fmtHM(s){
+  if(!s)return'--:--';
+  const m=s.match(/(\d{2}:\d{2})/);
+  return m?m[1]:'--:--';
+}
+function fmtDate(s){
+  if(!s)return'';
+  const m=s.match(/(\d{4}-\d{2}-\d{2})/);
+  if(!m)return'';
+  return new Date(m[1]+'T12:00:00Z').toLocaleDateString('zh-CN',{month:'short',day:'numeric'});
+}
+function hhmm(ms){
+  if(!ms||isNaN(ms)||ms<=0)return'0h';
+  const h=Math.floor(ms/3600000), m=Math.round((ms%3600000)/60000);
+  return h>0?(m>0?`${h}h${m}m`:`${h}h`):(m>0?`${m}m`:'0h');
+}
+
+// 可靠的本地时间→UTC：二分法+Intl
+function localToUtc(localStr, tz){
+  if(!localStr||!tz)return null;
+  const clean=localStr.replace('T',' ').substring(0,16);
+  const parts=clean.split(' ');
+  if(parts.length<2)return null;
+  const [dp,tp]=parts;
+  const [y,mo,d]=dp.split('-').map(Number);
+  const [h,m]=tp.split(':').map(Number);
+  if([y,mo,d,h,m].some(isNaN))return null;
+  const targetMins=h*60+m;
+  const targetDay=mo*100+d;
+  let lo=Date.UTC(y,mo-1,d,h,m)-14*3600000;
+  let hi=Date.UTC(y,mo-1,d,h,m)+14*3600000;
+  for(let i=0;i<30;i++){
+    const mid=Math.floor((lo+hi)/2);
+    const dt=new Date(mid);
+    const lh=+dt.toLocaleString('en',{timeZone:tz,hour:'numeric',hour12:false});
+    const lm=+dt.toLocaleString('en',{timeZone:tz,minute:'numeric'});
+    const ld=+dt.toLocaleString('en',{timeZone:tz,day:'numeric'});
+    const lmo=+dt.toLocaleString('en',{timeZone:tz,month:'numeric'});
+    const gotMins=lh*60+lm;
+    const gotDay=lmo*100+ld;
+    if(gotDay===targetDay&&gotMins===targetMins)return mid;
+    if(gotDay<targetDay||(gotDay===targetDay&&gotMins<targetMins))lo=mid+60000;
+    else hi=mid-60000;
+  }
+  return Math.floor((lo+hi)/2);
+}
+
+// ═══════════════════════════════════════
 // 状态
-// ══════════════════════════════════
-const BLANK={stops:['HKG','IST','GRU'],flights:['',''],dates:['',''],avKey:'',adbKey:'',apiMode:'free',baseCcy:'HKD',tzRef:'Asia/Hong_Kong',mockMode:false,label:'去程'};
-let TRIPS=[JSON.parse(JSON.stringify(BLANK)),{...JSON.parse(JSON.stringify(BLANK)),label:'回程',stops:['GRU','IST','HKG']}];
+// ═══════════════════════════════════════
+const BLANK={label:'去程',stops:['HKG','IST','GRU'],flights:['',''],dates:['',''],
+  avKey:'',adbKey:'',apiMode:'free',tzRef:'Asia/Hong_Kong',baseCcy:'HKD',mockMode:false};
+let TRIPS=[JSON.parse(JSON.stringify(BLANK)),
+  Object.assign(JSON.parse(JSON.stringify(BLANK)),{label:'回程',stops:['GRU','IST','HKG']})];
 let activeTrip=0;
-let wxCache={},fxCache={},fxTime=0;
+let wxCache={}, fxCache={}, fxTime=0;
+let fltCache={};
+let refreshTimer=null;
 const WX_TTL=10*60*1000;
 const WORKER='https://aviation-proxy.jack-focalist.workers.dev';
 
-// 航班数据缓存
-let fltCache={};   // {legKey: {data, ts, src}}
-let refreshTimer=null;
-
 function C(){return TRIPS[activeTrip];}
-function hhmm(ms){
-  if(!ms||isNaN(ms)||ms<=0)return'--';
-  const h=Math.floor(ms/3600000),m=Math.round((ms%3600000)/60000);
-  return`${h}h${m>0?m+'m':''}`;
-}
-function fmtHM(localStr){
-  if(!localStr)return'--:--';
-  const m=localStr.match(/T?(\d{2}:\d{2})/);
-  return m?m[1]:'--:--';
-}
-function fmtDate(localStr){
-  if(!localStr)return'';
-  const m=localStr.match(/(\d{4}-\d{2}-\d{2})/);
-  if(!m)return'';
-  const d=new Date(m[1]+'T12:00:00Z');
-  return d.toLocaleDateString('zh-CN',{month:'short',day:'numeric'});
-}
+function setBadge(id,txt,cls){const el=document.getElementById(id);if(el){el.textContent=txt;el.className='badge '+cls;}}
 
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 // 行程标签
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 function renderTabs(){
   const w=document.getElementById('trip-tabs');
   w.innerHTML='';
@@ -358,37 +369,47 @@ function renderTabs(){
   add.className='tab-add';add.textContent='+ 新行程';
   add.onclick=()=>{
     const t=JSON.parse(JSON.stringify(BLANK));
-    t.label='行程'+(TRIPS.length+1);TRIPS.push(t);
-    activeTrip=TRIPS.length-1;renderTabs();loadSettingsUI();buildUI();
+    t.label='行程'+(TRIPS.length+1);
+    TRIPS.push(t);activeTrip=TRIPS.length-1;
+    renderTabs();loadSettingsUI();buildUI();
   };
   w.appendChild(add);
 }
 
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 // 自动补全
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 function acIn(id,val){
   const q=val.toUpperCase().trim();
   const drop=document.getElementById('ac-'+id);
   if(q.length<1){drop.style.display='none';return;}
-  const hits=Object.entries(AP).filter(([k,v])=>k.startsWith(q)||v.en.toLowerCase().includes(q.toLowerCase())||v.city.includes(q)).slice(0,6);
+  const hits=Object.entries(AP).filter(([k,v])=>
+    k.startsWith(q)||v.en.toLowerCase().includes(q.toLowerCase())||v.city.includes(q)
+  ).slice(0,6);
   if(!hits.length){drop.style.display='none';return;}
-  drop.innerHTML=hits.map(([k,v])=>`<div class="aci" onclick="acSel('${id}','${k}')"><b>${k}</b><span>${v.city} · ${v.en}</span></div>`).join('');
+  drop.innerHTML=hits.map(([k,v])=>
+    `<div class="aci" onclick="acSel('${id}','${k}')"><b>${k}</b><span>${v.city} · ${v.en}</span></div>`
+  ).join('');
   drop.style.display='block';
 }
-function acSel(id,code){document.getElementById(id).value=code;document.getElementById('ac-'+id).style.display='none';}
-document.addEventListener('click',e=>{if(!e.target.closest('.acw'))document.querySelectorAll('.acd').forEach(d=>d.style.display='none');});
+function acSel(id,code){
+  document.getElementById(id).value=code;
+  document.getElementById('ac-'+id).style.display='none';
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.acw'))
+    document.querySelectorAll('.acd').forEach(d=>d.style.display='none');
+});
 
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 // 设置
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 function toggleSettings(){
   const p=document.getElementById('settings-panel');
-  const isHidden=p.style.display===''||p.style.display==='none';
-  p.style.display=isHidden?'block':'none';
+  p.style.display=(p.style.display==='none')?'block':'none';
 }
 function loadSettingsUI(){
-  const t=C(),s=t.stops;
+  const t=C(), s=t.stops;
   document.getElementById('s0').value=s[0]||'';
   document.getElementById('s1').value=s.length>2?s[1]:'';
   document.getElementById('s2').value=s.length>3?s[2]:'';
@@ -399,65 +420,81 @@ function loadSettingsUI(){
   document.getElementById('d1').value=t.dates[1]||'';
   document.getElementById('avk').value=t.avKey||'';
   document.getElementById('adbk').value=t.adbKey||'';
-  document.getElementById('api-mode').value=t.apiMode||'free';
+  document.getElementById('s-apimode').value=t.apiMode||'free';
   document.getElementById('s-tzref').value=t.tzRef||'Asia/Hong_Kong';
   document.getElementById('s-ccy').value=t.baseCcy||'HKD';
 }
 function applySettings(){
-  const codes=['s0','s1','s2','s3'].map(id=>document.getElementById(id).value.toUpperCase().trim()).filter(c=>c&&AP[c]);
+  const codes=['s0','s1','s2','s3'].map(id=>
+    document.getElementById(id).value.toUpperCase().trim()
+  ).filter(c=>c&&AP[c]);
   const stops=[...new Map(codes.map(c=>[c,c])).values()];
   if(stops.length<2){alert('至少需要有效的出发地和目的地');return;}
   const t=C();
   t.stops=stops;
-  t.flights=[document.getElementById('f0').value.trim().toUpperCase(),document.getElementById('f1').value.trim().toUpperCase()];
-  t.dates=[document.getElementById('d0').value,document.getElementById('d1').value];
+  t.flights=[
+    document.getElementById('f0').value.trim().toUpperCase(),
+    document.getElementById('f1').value.trim().toUpperCase()
+  ];
+  t.dates=[document.getElementById('d0').value, document.getElementById('d1').value];
   t.avKey=document.getElementById('avk').value.trim();
   t.adbKey=document.getElementById('adbk').value.trim();
-  t.apiMode=document.getElementById('api-mode').value;
+  t.apiMode=document.getElementById('s-apimode').value;
   t.tzRef=document.getElementById('s-tzref').value;
   t.baseCcy=document.getElementById('s-ccy').value;
-  saveLocal();fltCache={};wxCache={};fxCache={};fxTime=0;
+  saveLocal();
+  fltCache={};wxCache={};fxCache={};fxTime=0;
   document.getElementById('settings-panel').style.display='none';
   buildUI();scheduleRefresh();fetchWx();fetchFx();
 }
 function saveLocal(){try{localStorage.setItem('tv22',JSON.stringify(TRIPS));}catch(e){}}
-function loadLocal(){try{const s=localStorage.getItem('tv22');if(s)TRIPS=JSON.parse(s);}catch(e){}}
+function loadLocal(){
+  try{
+    const s=localStorage.getItem('tv22');
+    if(s){
+      const parsed=JSON.parse(s);
+      if(Array.isArray(parsed)&&parsed.length)
+        TRIPS=parsed.map(t=>Object.assign(JSON.parse(JSON.stringify(BLANK)),t));
+    }
+  }catch(e){}
+}
 
-// ══════════════════════════════════
-// 测试/真实模式
-// ══════════════════════════════════
+// ═══════════════════════════════════════
+// 模式切换
+// ═══════════════════════════════════════
 function toggleMode(){
-  C().mockMode=!C().mockMode;saveLocal();
+  C().mockMode=!C().mockMode;
+  saveLocal();
   const m=C().mockMode;
   document.getElementById('btn-mode').textContent=m?'🧪 测试':'🛰 真实';
   document.getElementById('btn-mode').classList.toggle('on',m);
   document.getElementById('prog-note').textContent=m?'· 测试模式，手动拖动':'· 根据航班时间自动推进';
-  if(!m)scheduleRefresh();else renderProgress();
+  if(!m)scheduleRefresh();else renderProgressMock();
 }
 
-// ══════════════════════════════════
-// 建立UI
-// ══════════════════════════════════
+// ═══════════════════════════════════════
+// 建立UI骨架
+// ═══════════════════════════════════════
 function buildUI(){
-  const t=C(),stops=t.stops,n=stops.length;
+  const t=C(), stops=t.stops, n=stops.length;
   document.getElementById('route-label').textContent=stops.join(' → ');
-  document.getElementById('btn-mode').textContent=t.mockMode?'🧪 测试':'🛰 真实';
-  document.getElementById('btn-mode').classList.toggle('on',t.mockMode);
-  document.getElementById('prog-note').textContent=t.mockMode?'· 测试模式，手动拖动':'· 根据航班时间自动推进';
+  const m=t.mockMode;
+  document.getElementById('btn-mode').textContent=m?'🧪 测试':'🛰 真实';
+  document.getElementById('btn-mode').classList.toggle('on',m);
+  document.getElementById('prog-note').textContent=m?'· 测试模式，手动拖动':'· 根据航班时间自动推进';
 
   // 城市卡片
   const cw=document.getElementById('cities-wrap');
-  cw.style.gridTemplateColumns=`repeat(${Math.min(n,3)},1fr)`;
   cw.innerHTML='';
   stops.forEach((code,i)=>{
-    const a=AP[code],e=emerg(a.cc);
+    const a=AP[code], e=getEmerg(a.cc);
     const role=i===0?'出发地':i===n-1?'目的地':(n>3?`中转${i}`:'中转');
     cw.innerHTML+=`
     <div class="cc" id="card-${code}">
       <div class="cbar" id="cb-${code}"></div>
       <div class="cb">
         <div class="ctag">${code} · ${role}</div>
-        <div class="cname">${a.city}<br><span style="font-size:11px;color:#888780;font-weight:400">${a.en}</span></div>
+        <div class="cname">${a.city}<small>${a.en}</small></div>
         <div class="crow">
           <div class="ctime" id="ct-${code}">--:--</div>
           <div class="cpill" id="cp-${code}">--</div>
@@ -467,44 +504,49 @@ function buildUI(){
         <div class="wxrow">
           <span id="wi-${code}" style="font-size:17px">⏳</span>
           <span class="wxtemp" id="wt-${code}">--</span>
-          <span class="wxdesc" id="wd-${code}" style="font-size:11px;color:#73726c">加载中</span>
+          <span class="wxdesc" id="wd-${code}">加载中</span>
         </div>
         <div class="outfit" id="ot-${code}" style="color:#aaa">获取天气中...</div>
         <div class="div"></div>
         <div class="ir"><span class="il">警察</span><span class="ev">${e.p}</span></div>
         <div class="ir"><span class="il">救护</span><span class="ev">${e.a}</span></div>
         <div class="ir"><span class="il">货币</span><span class="iv">${a.ccy}</span></div>
-        <div class="ir"><span class="il" id="fxlbl-${code}">消费参考</span><span class="iv" id="fx-${code}">加载中</span></div>
+        <div class="ir"><span class="il">消费参考</span><span class="iv" id="fx-${code}">加载中</span></div>
       </div>
     </div>`;
   });
 
   // 进度条节点
-  const nr=document.getElementById('nodes-row'),nl=document.getElementById('node-labels');
+  const nr=document.getElementById('nodes-row'), nl=document.getElementById('node-labels');
   nr.innerHTML='';nl.innerHTML='';
   stops.forEach((code,i)=>{
-    const d=document.createElement('div');
-    d.className='nd'+(i===0?' done':'');d.id='nd-'+i;d.textContent=code.slice(0,2);nr.appendChild(d);
-    const l=document.createElement('span');l.className='nl';l.id='nl-'+i;
-    l.innerHTML=`<b>${code}</b><br>${AP[code].city}`;nl.appendChild(l);
+    const nd=document.createElement('div');
+    nd.className='nd'+(i===0?' done':'');nd.id='nd-'+i;nd.textContent=code.slice(0,2);nr.appendChild(nd);
+    const lb=document.createElement('span');lb.className='nl';lb.id='nl-'+i;
+    lb.innerHTML=`<b>${code}</b><br>${AP[code].city}`;nl.appendChild(lb);
   });
   document.getElementById('s-dist').textContent=calcDist(stops).toLocaleString()+' km';
 
   // 提示卡
   const tw=document.getElementById('tips-wrap');
-  tw.style.gridTemplateColumns=`repeat(${Math.min(n,3)},1fr)`;tw.innerHTML='';
+  tw.innerHTML='';
   stops.forEach((code,i)=>{
     const role=i===0?'出发地':i===n-1?'目的地':AP[code].city+'·中转';
-    tw.innerHTML+=`<div class="tip-card"><div class="tip-city">${code} · ${role}</div><div class="tip-text" id="tip-${code}">--</div></div>`;
+    tw.innerHTML+=`
+    <div class="tip-card">
+      <div class="tip-city">${code} · ${role}</div>
+      <div class="tip-text" id="tip-${code}">--</div>
+    </div>`;
   });
 
-  renderProgress();
+  renderProgressMock();
 }
 
 function calcDist(stops){
   let d=0;
   for(let i=0;i<stops.length-1;i++){
-    const a=AP[stops[i]],b=AP[stops[i+1]];if(!a||!b)continue;
+    const a=AP[stops[i]], b=AP[stops[i+1]];
+    if(!a||!b)continue;
     const R=6371,f1=a.lat*Math.PI/180,f2=b.lat*Math.PI/180,
       df=(b.lat-a.lat)*Math.PI/180,dl=(b.lng-a.lng)*Math.PI/180,
       x=Math.sin(df/2)**2+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2;
@@ -513,275 +555,233 @@ function calcDist(stops){
   return Math.round(d/100)*100;
 }
 
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 // 时钟
-// ══════════════════════════════════
+// ═══════════════════════════════════════
+const TZ_NAMES={
+  'Asia/Hong_Kong':'香港','America/Los_Angeles':'西雅图',
+  'America/New_York':'纽约','America/Chicago':'芝加哥',
+  'Europe/London':'伦敦','Europe/Paris':'巴黎',
+  'Asia/Shanghai':'北京','Asia/Tokyo':'东京',
+  'Asia/Singapore':'新加坡','Australia/Sydney':'悉尼'
+};
+
 function localH(tz){return +new Date().toLocaleString('en',{timeZone:tz,hour:'numeric',hour12:false});}
 function localDateStr(tz){return new Date().toLocaleDateString('en-CA',{timeZone:tz});}
+
 function callStatus(h){
   if(h>=8&&h<=22)return['ok','📞 适合联络'];
   if(h>=23||h<=2)return['no','🌙 深夜'];
   return['warn','💤 凌晨'];
 }
+
 function updateClocks(){
   const stops=C().stops, now=new Date();
   const tzRef=C().tzRef||'Asia/Hong_Kong';
-  const tzRefName=(()=>{
-    const map={'Asia/Hong_Kong':'香港','America/Los_Angeles':'西雅图','America/New_York':'纽约',
-      'America/Chicago':'芝加哥','Europe/London':'伦敦','Europe/Paris':'巴黎',
-      'Asia/Shanghai':'北京','Asia/Tokyo':'东京','Asia/Singapore':'新加坡','Australia/Sydney':'悉尼'};
-    return map[tzRef]||tzRef;
-  })();
+  const refName=TZ_NAMES[tzRef]||tzRef;
+  const baseDateStr=localDateStr(tzRef);
 
-  stops.forEach((code,idx)=>{
-    const a=AP[code];if(!a)return;
-    const tel=document.getElementById('ct-'+code);if(!tel)return;
+  stops.forEach(code=>{
+    const a=AP[code]; if(!a)return;
+    const tel=document.getElementById('ct-'+code); if(!tel)return;
+
     tel.textContent=now.toLocaleTimeString('zh-CN',{timeZone:a.tz,hour:'2-digit',minute:'2-digit',hour12:false});
 
-    // 日期（以基准时区为参考，检测跨日）
-    const baseDateStr=localDateStr(tzRef);
-    const thisDateStr=localDateStr(a.tz);
     const dateLabel=now.toLocaleDateString('zh-CN',{timeZone:a.tz,month:'long',day:'numeric',weekday:'short'});
-    const diff=Math.round((new Date(thisDateStr)-new Date(baseDateStr))/864e5);
+    const thisDate=localDateStr(a.tz);
+    const diff=Math.round((new Date(thisDate)-new Date(baseDateStr))/864e5);
     const cdEl=document.getElementById('cd-'+code);
     if(cdEl)cdEl.innerHTML=diff!==0
       ?`${dateLabel} <span class="ddiff">${diff>0?'+':''}${diff}天</span>`
       :dateLabel;
 
-    // 联络状态
     const h=localH(a.tz);
-    const[cls,txt]=callStatus(h);
-    const cb=document.getElementById('cb-'+code),cp=document.getElementById('cp-'+code);
+    const [cls,txt]=callStatus(h);
+    const cb=document.getElementById('cb-'+code), cp=document.getElementById('cp-'+code);
     if(cb)cb.className='cbar '+cls;
     if(cp){cp.className='cpill '+cls;cp.textContent=txt;}
 
-    // 时差（所有城市都显示，基准为用户选定时区）
-    const tzEl=document.getElementById('ctz-'+code);
-    if(tzEl){
-      const hRef=localH(tzRef), hThis=localH(a.tz);
-      let dh=hThis-hRef;
-      if(dh>12)dh-=24;if(dh<-12)dh+=24;
-      const sign=dh>=0?'+':'';
-      tzEl.textContent=`与${tzRefName}时差 ${sign}${dh}h`;
-      tzEl.style.color='#73726c'; // 可读性
-    }
+    // 时差（所有城市都显示）
+    const hRef=localH(tzRef), hThis=localH(a.tz);
+    let dh=hThis-hRef;
+    if(dh>12)dh-=24; if(dh<-12)dh+=24;
+    const el=document.getElementById('ctz-'+code);
+    if(el)el.textContent=`与${refName}时差 ${dh>=0?'+':''}${dh}h`;
   });
 }
 
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 // 天气
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 async function fetchWx(){
   for(const code of C().stops){
-    const a=AP[code];if(!a)continue;
+    const a=AP[code]; if(!a)continue;
     if(wxCache[code]&&Date.now()-wxCache[code].ts<WX_TTL){renderWx(code,wxCache[code]);continue;}
     try{
       const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${a.lat}&longitude=${a.lng}&current=temperature_2m,weathercode&timezone=${encodeURIComponent(a.tz)}`);
       const d=await r.json();
       const data={temp:Math.round(d.current.temperature_2m),code:d.current.weathercode,ts:Date.now()};
-      wxCache[code]=data;renderWx(code,data);
-    }catch(e){const el=document.getElementById('wd-'+code);if(el)el.textContent='暂无';}
+      wxCache[code]=data; renderWx(code,data);
+    }catch(e){
+      const el=document.getElementById('wd-'+code); if(el)el.textContent='暂无';
+    }
   }
   setBadge('b-wx','🌤 Open-Meteo','green');
 }
 function renderWx(code,d){
-  const wi=document.getElementById('wi-'+code);if(!wi)return;
+  const wi=document.getElementById('wi-'+code); if(!wi)return;
   wi.textContent=wxIcon(d.code);
   document.getElementById('wt-'+code).textContent=d.temp+'°C';
   document.getElementById('wd-'+code).textContent=wxDesc(d.code);
   const ot=document.getElementById('ot-'+code);
   if(ot){ot.textContent=outfitTip(d.temp,d.code);ot.style.color='';}
-  updateTip(code);
+  updateTip(code,[]);
 }
 
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 // 汇率
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 async function fetchFx(){
   const base=C().baseCcy;
   if(Date.now()-fxTime<WX_TTL&&Object.keys(fxCache).length){renderFx();return;}
   try{
     const r=await fetch(`https://api.exchangerate-api.com/v4/latest/${base}`);
-    const d=await r.json();fxCache=d.rates||{};fxTime=Date.now();
+    const d=await r.json();
+    fxCache=d.rates||{}; fxTime=Date.now();
     setBadge('b-fx','💱 实时汇率','green');
-  }catch(e){setBadge('b-fx','💱 汇率（离线）','orange');}
+  }catch(e){
+    setBadge('b-fx','💱 汇率（离线）','orange');
+  }
   renderFx();
 }
 function renderFx(){
   const base=C().baseCcy;
   C().stops.forEach(code=>{
-    const a=AP[code];if(!a)return;
-    const el=document.getElementById('fx-'+code);if(!el)return;
+    const a=AP[code]; if(!a)return;
+    const el=document.getElementById('fx-'+code); if(!el)return;
     const tgt=a.ccy;
     if(tgt===base){el.textContent='本地货币';return;}
     const rate=fxCache[tgt];
-    if(rate){const inv=1/rate;el.textContent=`1 ${tgt} = ${inv>=100?inv.toFixed(0):inv>=10?inv.toFixed(1):inv.toFixed(2)} ${base}`;}
-    else el.textContent='--';
+    if(rate){
+      const inv=1/rate;
+      el.textContent=`1 ${tgt} = ${inv>=100?inv.toFixed(0):inv>=10?inv.toFixed(1):inv.toFixed(2)} ${base}`;
+    }else el.textContent='--';
   });
 }
 
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 // 智能刷新调度
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 function scheduleRefresh(){
   if(refreshTimer)clearTimeout(refreshTimer);
   if(C().mockMode)return;
-  const interval=nextRefreshMs();
-  if(interval===null)return; // 不需要刷新
   fetchFlight();
-  refreshTimer=setTimeout(scheduleRefresh,interval);
+  const ms=nextRefreshMs();
+  if(ms)refreshTimer=setTimeout(scheduleRefresh,ms);
 }
 
 function nextRefreshMs(){
   const t=C();
-  const legs=buildLegs();
-  if(!legs.length)return null;
-
   const now=Date.now();
-  // 找到当前或下一个关键时间点
-  for(const leg of legs){
-    if(!leg.depUtc)continue;
-    const toGate=leg.depUtc-now;         // 距起飞
-    const toArr=leg.arrUtc?leg.arrUtc-now:null; // 距落地
-
-    if(toGate>0){
-      // 未起飞
-      if(toGate>24*3600*1000)return null; // 超过1天，不查
-      if(toGate<=3600*1000)return 15*60*1000; // 1小时内，15分钟
-      return 60*60*1000; // 否则1小时
-    }
-    // 已起飞
-    if(toArr!==null){
-      if(toArr<=0)continue; // 已落地，看下一段
-      if(toArr<=3600*1000)return 15*60*1000; // 落地前1小时，15分钟
-      return 60*60*1000; // 飞行中，1小时
-    }
-  }
-  return null; // 全部落地
-}
-
-function buildLegs(){
-  // 从设置日期+内置时刻估算各段起落UTC时间（用于调度，不用于显示）
-  const t=C();
-  const legs=[];
   for(let i=0;i<t.flights.length;i++){
-    const flt=t.flights[i],date=t.dates[i];
+    const flt=t.flights[i], date=t.dates[i];
     if(!flt||!date)continue;
-    // 用缓存里的实际时间，否则用计划
     const key=`${flt}_${date}`;
     const cached=fltCache[key];
-    if(cached&&cached.data){
-      const dep=cached.data.depLocal,arr=cached.data.arrLocal;
-      if(dep)legs.push({depUtc:localStrToUtcApprox(dep,t.stops[i]),arrUtc:arr?localStrToUtcApprox(arr,t.stops[i+1]):null});
-    }else{
-      // 无缓存，保守估算：出发日当天中午
-      const depTs=new Date(date+'T12:00:00Z').getTime();
-      legs.push({depUtc:depTs,arrUtc:depTs+14*3600*1000});
+    if(!cached)continue;
+    const dep=cached.data?.depLocal, arr=cached.data?.arrLocal;
+    if(!dep)continue;
+    const depUtc=localToUtc(dep,AP[t.stops[i]]?.tz);
+    const arrUtc=arr?localToUtc(arr,AP[t.stops[i+1]]?.tz):null;
+    if(!depUtc)continue;
+    const toGate=depUtc-now;
+    const toArr=arrUtc?arrUtc-now:null;
+    if(toGate>24*3600000)return null;
+    if(toGate>0)return toGate<=3600000?15*60*1000:60*60*1000;
+    if(toArr!==null){
+      if(toArr<=0)continue;
+      return toArr<=3600000?15*60*1000:60*60*1000;
     }
   }
-  return legs;
+  return null;
 }
 
-function localStrToUtcApprox(localStr,code){
-  // 粗略：用机场时区把本地时间转UTC
-  const a=AP[code];if(!a)return Date.now();
-  const base=localStr.replace(' ','T').substring(0,16);
-  try{
-    const d=new Date(base+':00');
-    const offset=new Date().toLocaleString('en',{timeZone:a.tz,timeZoneName:'shortOffset'}).match(/GMT([+-]\d+)/);
-    const oh=offset?parseInt(offset[1]):0;
-    return d.getTime()-oh*3600*1000;
-  }catch(e){return Date.now();}
-}
-
-// ══════════════════════════════════
-// 航班查询：组合策略
-// AeroDataBox(specific date) → AviationStack(实时) → 时刻估算
-// ══════════════════════════════════
+// ═══════════════════════════════════════
+// 航班查询
+// ═══════════════════════════════════════
 async function fetchFlight(){
   const t=C();
-  if(t.mockMode){renderProgress();return;}
+  if(t.mockMode){renderProgressMock();return;}
   setBadge('b-flt','✈ 查询中...','blue');
 
   const legs=[];
   for(let i=0;i<t.flights.length;i++){
-    const flt=t.flights[i],date=t.dates[i];
-    if(!flt)continue;
-    legs.push({flt,date,idx:i,depIata:t.stops[i],arrIata:t.stops[i+1]});
+    if(t.flights[i])legs.push({flt:t.flights[i],date:t.dates[i],idx:i,
+      depIata:t.stops[i],arrIata:t.stops[i+1]});
   }
-  if(!legs.length){setBadge('b-flt','✈ 未设置航班','gray');renderProgress();return;}
+  if(!legs.length){setBadge('b-flt','✈ 未设置航班','gray');renderProgressMock();return;}
 
-  // 检查是否到了出发日
-  const firstLeg=legs[0];
-  if(firstLeg.date){
-    const depA=AP[firstLeg.depIata];
+  // 检查是否到出发日
+  const fl=legs[0];
+  if(fl.date){
+    const depA=AP[fl.depIata];
     const todayLocal=depA?localDateStr(depA.tz):new Date().toISOString().slice(0,10);
-    if(todayLocal<firstLeg.date){
-      const days=Math.round((new Date(firstLeg.date)-new Date(todayLocal))/864e5);
+    if(todayLocal<fl.date){
+      const days=Math.round((new Date(fl.date)-new Date(todayLocal))/864e5);
       setBadge('b-flt',`✈ 距出发还有${days}天`,'gray');
-      document.getElementById('leg-status').textContent=`${firstLeg.date} 出发`;
-      renderProgress();return;
+      document.getElementById('leg-status').textContent=`${fl.date} 出发`;
+      renderProgressMock();return;
     }
   }
 
-  let fltData={}; // {legIdx: {depLocal, arrLocal, depDate, status, delay, src}}
+  const fltData={};
 
   for(const leg of legs){
     const key=`${leg.flt}_${leg.date||'nd'}`;
-    // 用缓存（10分钟内）
     if(fltCache[key]&&Date.now()-fltCache[key].ts<WX_TTL){
-      fltData[leg.idx]=fltCache[key].data;continue;
+      fltData[leg.idx]=fltCache[key].data; continue;
     }
-
     let data=null;
 
-    // ① AeroDataBox specific date（主力，指定日期）
+    // ① AeroDataBox specific date（主力）
     if(t.adbKey&&leg.date){
       try{
         const url=`https://aerodatabox.p.rapidapi.com/flights/${leg.flt}/${leg.date}`;
-        const proxyTarget=encodeURIComponent(url);
-        const r=await fetch(`${WORKER}?target=${proxyTarget}&host=aerodatabox.p.rapidapi.com&key=${encodeURIComponent(t.adbKey)}`);
+        const r=await fetch(`${WORKER}?target=${encodeURIComponent(url)}&host=aerodatabox.p.rapidapi.com&key=${encodeURIComponent(t.adbKey)}`);
         if(r.ok){
           const arr=await r.json();
-          // 筛选出发地匹配的航班（用arrival iata匹配目的地）
           const match=Array.isArray(arr)&&arr.find(f=>{
             const arrIata=f.arrival?.airport?.iata;
-            const depName=f.departure?.airport?.name||'';
-            return arrIata===leg.arrIata||(depName&&AP[leg.depIata]&&depName.toLowerCase().includes(AP[leg.depIata].en.toLowerCase().split(' ')[0].toLowerCase()));
+            const depName=(f.departure?.airport?.name||'').toLowerCase();
+            const depCity=(AP[leg.depIata]?.en||'').toLowerCase().split(' ')[0];
+            return arrIata===leg.arrIata||depName.includes(depCity);
           });
           if(match){
-            const dep=match.departure,arr2=match.arrival;
+            const dep=match.departure, arr2=match.arrival;
             const depL=dep?.actualTime?.local||dep?.revisedTime?.local||dep?.scheduledTime?.local;
             const arrL=arr2?.actualTime?.local||arr2?.revisedTime?.local||arr2?.predictedTime?.local||arr2?.scheduledTime?.local;
             data={depLocal:depL,arrLocal:arrL,depDate:leg.date,status:match.status,delay:dep?.delay,src:'AeroDataBox'};
           }
         }
-      }catch(e){console.warn('AeroDataBox failed:',e.message);}
+      }catch(e){console.warn('AeroDataBox:',e.message);}
     }
 
-    // ② AviationStack（实时补充，获取actual时间）
+    // ② AviationStack（实时补充）
     if(t.avKey){
       try{
         const qs=new URLSearchParams({access_key:t.avKey,flight_iata:leg.flt,limit:'1'});
-        const apiUrl='http://api.aviationstack.com/v1/flights?'+qs;
-        const r=await fetch(`${WORKER}?target=${encodeURIComponent(apiUrl)}`);
+        const r=await fetch(`${WORKER}?target=${encodeURIComponent('http://api.aviationstack.com/v1/flights?'+qs)}`);
         if(r.ok){
           const d=await r.json();
           if(d.data&&d.data.length){
             const f=d.data[0];
-            const depL=f.departure?.actual||f.departure?.estimated||f.departure?.scheduled;
-            const arrL=f.arrival?.actual||f.arrival?.estimated||f.arrival?.scheduled;
-            // AviationStack 时间取 HH:MM 部分（当地时间）
-            const depHM=depL?depL.substring(11,16):null;
-            const arrHM=arrL?arrL.substring(11,16):null;
-            const depDate=depL?depL.substring(0,10):leg.date;
-            const arrDate=arrL?arrL.substring(0,10):leg.date;
-            const depLocal=depHM?`${depDate} ${depHM}`:null;
-            const arrLocal=arrHM?`${arrDate} ${arrHM}`:null;
+            const depRaw=f.departure?.actual||f.departure?.estimated||f.departure?.scheduled;
+            const arrRaw=f.arrival?.actual||f.arrival?.estimated||f.arrival?.scheduled;
+            const depLocal=depRaw?depRaw.substring(0,10)+' '+depRaw.substring(11,16):null;
+            const arrLocal=arrRaw?arrRaw.substring(0,10)+' '+arrRaw.substring(11,16):null;
             if(!data){
-              data={depLocal,arrLocal,depDate,status:f.flight_status,delay:f.departure?.delay,src:'AviationStack'};
+              data={depLocal,arrLocal,depDate:leg.date,status:f.flight_status,delay:f.departure?.delay,src:'AviationStack'};
             }else{
-              // 合并：AeroDataBox 有计划时间，AviationStack 补充实际时间
               if(depLocal)data.depActual=depLocal;
               if(arrLocal)data.arrActual=arrLocal;
               data.status=f.flight_status||data.status;
@@ -790,296 +790,248 @@ async function fetchFlight(){
             }
           }
         }
-      }catch(e){console.warn('AviationStack failed:',e.message);}
+      }catch(e){console.warn('AviationStack:',e.message);}
     }
 
-    // ③ 无数据时用时刻估算
     if(!data&&leg.date){
       data={depLocal:leg.date+' 12:00',arrLocal:null,depDate:leg.date,status:'unknown',src:'估算'};
     }
-
     if(data){fltCache[key]={data,ts:Date.now()};fltData[leg.idx]=data;}
   }
 
-  // 更新徽章
   const srcs=[...new Set(Object.values(fltData).map(d=>d?.src).filter(Boolean))];
-  const mainSrc=srcs.join('+');
-  const badgeCls=mainSrc.includes('AeroDataBox')||mainSrc.includes('AviationStack')?'green':mainSrc.includes('估算')?'orange':'gray';
-  setBadge('b-flt','✈ '+mainSrc,badgeCls);
+  const srcTxt=srcs.join('+');
+  const badgeCls=srcTxt.includes('AeroDataBox')||srcTxt.includes('AviationStack')?'green':srcTxt.includes('估算')?'orange':'gray';
+  setBadge('b-flt','✈ '+srcTxt,badgeCls);
 
   renderProgressFromData(fltData);
 }
 
-// ══════════════════════════════════
-// Cloudflare Worker：需支持 AeroDataBox header 转发
-// ══════════════════════════════════
-// Worker 端需更新以支持 RapidAPI headers，见部署说明
-
-// ══════════════════════════════════
-// 进度渲染
-// ══════════════════════════════════
+// ═══════════════════════════════════════
+// 进度渲染（有数据）
+// ═══════════════════════════════════════
 function renderProgressFromData(fltData){
-  const t=C(),stops=t.stops,n=stops.length;
-  const now=Date.now();
-  const segCount=n-1;
-  const segSize=100/segCount;
+  const t=C(), stops=t.stops, n=stops.length, now=Date.now();
+  const segCount=n-1, segSize=100/segCount;
 
-  let totalPct=0,currentLegIdx=-1,allDone=true,flownMs=0,remMs=0;
+  // 构建 legInfos
   const legInfos=[];
+  let currentLegIdx=-1, allDone=true;
 
   for(let i=0;i<segCount;i++){
     const d=fltData[i];
     const depStr=d?.depActual||d?.depLocal;
     const arrStr=d?.arrActual||d?.arrLocal;
-    const depCode=stops[i],arrCode=stops[i+1];
-    const depA=AP[depCode],arrA=AP[arrCode];
-
-    let info={idx:i,depCode,arrCode,d,depStr,arrStr,pct:0,state:'unknown',depUtc:null,arrUtc:null};
+    const depA=AP[stops[i]], arrA=AP[stops[i+1]];
+    const info={idx:i,depCode:stops[i],arrCode:stops[i+1],d,depStr,arrStr,
+      pct:0,state:'unknown',depUtc:null,arrUtc:null};
 
     if(depStr){
-      const depUtc=approxUtc(depStr,depA?.tz);
-      const arrUtc=arrStr?approxUtc(arrStr,arrA?.tz):null;
-
-      // 防止NaN
-      if(depUtc===null||isNaN(depUtc)){info.state='unknown';legInfos.push(info);continue;}
-
+      const depUtc=localToUtc(depStr,depA?.tz);
+      const arrUtc=arrStr?localToUtc(arrStr,arrA?.tz):null;
+      if(depUtc===null||isNaN(depUtc)){legInfos.push(info);continue;}
       info.depUtc=depUtc;
       info.arrUtc=arrUtc;
-
-      const effectiveArr=arrUtc&&!isNaN(arrUtc)?arrUtc:depUtc+14*3600*1000;
-
+      const effArr=(arrUtc&&!isNaN(arrUtc))?arrUtc:depUtc+14*3600000;
       if(now<depUtc){
-        info.state='pending';info.pct=0;allDone=false;
-      }else if(now>=effectiveArr){
-        info.state='done';info.pct=1;
+        info.state='pending'; info.pct=0; allDone=false;
+      }else if(now>=effArr){
+        info.state='done'; info.pct=1;
       }else{
-        info.state='active';allDone=false;currentLegIdx=i;
-        info.pct=Math.max(0,Math.min(1,(now-depUtc)/(effectiveArr-depUtc)));
+        info.state='active'; info.pct=Math.max(0,Math.min(1,(now-depUtc)/(effArr-depUtc)));
+        allDone=false; currentLegIdx=i;
       }
     }
     legInfos.push(info);
   }
 
   // 总进度
-  let pctSum=0;
+  let totalPct=0;
   legInfos.forEach((info,i)=>{
-    const segStart=i*segSize,segEnd=(i+1)*segSize;
-    pctSum=Math.max(pctSum,segStart+info.pct*(segEnd-segStart));
+    const segStart=i*segSize, segEnd=(i+1)*segSize;
+    const p=segStart+info.pct*(segEnd-segStart);
+    if(p>totalPct)totalPct=p;
   });
-  totalPct=Math.round(pctSum);
+  totalPct=Math.round(totalPct);
 
-  updateProgressBar(totalPct,legInfos);
-  renderLegsDetail(legInfos,fltData);
-  updateLegStatus(legInfos,currentLegIdx,allDone);
-
-  // 全程总时长估算（用于剩余显示）
-  const totalEstH=calcDist(stops)/850;
-  // 全程已飞：已完成段+当前段已飞
-  let flownMs=0;
-  legInfos.forEach(info=>{
-    if(info.state==='done'&&info.depUtc&&info.arrUtc)flownMs+=info.arrUtc-info.depUtc;
-    else if(info.state==='active'&&info.depUtc)flownMs+=now-info.depUtc;
-  });
-  // 全程已飞/剩余：已在顶部声明 flownMs/remMs
+  // 已飞 / 剩余
+  let flownMs=0, remMs=0;
   legInfos.forEach(info=>{
     if(!info.depUtc||isNaN(info.depUtc))return;
     if(info.state==='done'&&info.arrUtc&&!isNaN(info.arrUtc))
       flownMs+=info.arrUtc-info.depUtc;
-    else if(info.state==='active'&&info.depUtc)
+    else if(info.state==='active')
       flownMs+=now-info.depUtc;
     if(info.state==='active'&&info.arrUtc&&!isNaN(info.arrUtc))
       remMs+=info.arrUtc-now;
     else if(info.state==='pending'&&info.depUtc&&info.arrUtc&&!isNaN(info.arrUtc))
       remMs+=info.arrUtc-info.depUtc;
   });
-  const flownDisp=flownMs>0?hhmm(flownMs):'0h';
-  const remDisp=remMs>0?'~'+hhmm(remMs):(totalPct>=100?'已抵达':'~'+hhmm(totalEstH*3600000));
-  document.getElementById('s-flown').textContent=flownDisp;
-  document.getElementById('s-remain').textContent=remDisp;
+  document.getElementById('s-flown').textContent=hhmm(flownMs);
+  document.getElementById('s-remain').textContent=
+    totalPct>=100?'已抵达':(remMs>0?'~'+hhmm(remMs):'~'+hhmm(calcDist(stops)/850*3600000));
 
-  // 旅途提示：根据实际航段状态判断，不依赖总进度
-  stops.forEach(code=>updateTip(code,totalPct,currentLegIdx,legInfos));
+  updateProgressBar(totalPct,legInfos);
+  renderLegsDetail(legInfos);
+  updateLegStatus(legInfos,currentLegIdx,allDone);
+  stops.forEach(code=>updateTip(code,legInfos));
 }
 
-function approxUtc(localStr,tz){
-  if(!localStr)return null;
-  // 取 "2026-05-13 17:45" 或 "2026-05-13T17:45" 格式的前16位
-  const clean=localStr.replace('T',' ').substring(0,16); // "2026-05-13 17:45"
-  if(!tz)return new Date(clean.replace(' ','T')+':00Z').getTime();
-  try{
-    // 构造该时区的本地时间对应的UTC
-    // 方法：在该时区取一个参考点，算出UTC偏移量
-    const ref=new Date(clean.replace(' ','T')+':00Z');
-    // ref 是把本地时间当UTC解析的结果，需要加上时区偏移
-    const localStr2=ref.toLocaleString('en-CA',{timeZone:tz,hour12:false,
-      year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
-    // en-CA: "2026-05-13, 20:45" — 这是UTC时间在该时区显示的结果
-    const parts=localStr2.replace(',','').trim().split(' ');
-    const refLocal=new Date(parts[0]+'T'+parts[1]+':00Z');
-    const offset=ref.getTime()-refLocal.getTime(); // UTC偏移毫秒
-    return ref.getTime()+offset;
-  }catch(e){return new Date(clean.replace(' ','T')+':00Z').getTime();}
-}
-
+// 进度条+节点
 function updateProgressBar(pct,legInfos){
-  const stops=C().stops,n=stops.length;
+  const stops=C().stops, n=stops.length, segSize=100/(n-1);
   document.getElementById('tfill').style.width=pct+'%';
   document.getElementById('slider').value=pct;
-  const segSize=100/(n-1);
   stops.forEach((_,i)=>{
     const nd=document.getElementById('nd-'+i);
     if(nd)nd.className='nd'+(pct>=i*segSize?' done':'');
   });
-  // 节点标签加日期
-  legInfos.forEach((info,i)=>{
-    const nl=document.getElementById('nl-'+i);
-    if(!nl)return;
-    const code=stops[i],a=AP[code];
-    const depStr=i===0?info.depStr:legInfos[i-1]?.arrStr;
-    let dateLabel='';
-    if(depStr){const dm=depStr.match(/(\d{4}-\d{2}-\d{2})/);if(dm)dateLabel=fmtDate(dm[0]);}
-    const timeLabel=i===0?(info.depStr?fmtHM(info.depStr):''):(legInfos[i-1]?.arrStr?fmtHM(legInfos[i-1].arrStr):'');
-    nl.innerHTML=`<b>${code}</b><br>${a.city}${dateLabel?'<br>'+dateLabel:''}${timeLabel?' '+timeLabel:''}`;
+
+  // 节点标签
+  stops.forEach((code,i)=>{
+    const nl=document.getElementById('nl-'+i); if(!nl)return;
+    const a=AP[code];
+    const isFirst=i===0, isLast=i===n-1;
+    if(isFirst){
+      const dep=legInfos[0]?.depStr;
+      nl.innerHTML=`<b>${code}</b><br>${a.city}${dep?'<br>'+fmtDate(dep)+' '+fmtHM(dep):''}`;
+    }else if(isLast){
+      const arr=legInfos[n-2]?.arrStr;
+      nl.innerHTML=`<b>${code}</b><br>${a.city}${arr?'<br>'+fmtDate(arr)+' '+fmtHM(arr):''}`;
+    }else{
+      // 中转地：双行显示到达和出发
+      const arrStr=legInfos[i-1]?.arrStr;
+      const depStr=legInfos[i]?.depStr;
+      nl.innerHTML=`<b>${code}</b><br>${a.city}`
+        +`<br><span class="nl-arr">到 ${arrStr?fmtHM(arrStr)+' '+fmtDate(arrStr):'--'}</span>`
+        +`<br><span class="nl-dep">发 ${depStr?fmtHM(depStr)+' '+fmtDate(depStr):'--'}</span>`;
+    }
   });
-  // 最后一个节点
-  const lastNl=document.getElementById('nl-'+(stops.length-1));
-  if(lastNl&&legInfos.length){
-    const last=legInfos[legInfos.length-1];
-    const code=stops[stops.length-1],a=AP[code];
-    const arrStr=last?.arrStr;
-    let dateLabel='',timeLabel='';
-    if(arrStr){const dm=arrStr.match(/(\d{4}-\d{2}-\d{2})/);if(dm)dateLabel=fmtDate(dm[0]);timeLabel=fmtHM(arrStr);}
-    lastNl.innerHTML=`<b>${code}</b><br>${a.city}${dateLabel?'<br>'+dateLabel:''}${timeLabel?' '+timeLabel:''}`;
-  }
+
   // 高亮卡片
   stops.forEach(c=>document.getElementById('card-'+c)?.classList.remove('active'));
-  if(pct>=100)document.getElementById('card-'+stops[stops.length-1])?.classList.add('active');
+  if(pct>=100)document.getElementById('card-'+stops[n-1])?.classList.add('active');
   else if(pct===0)document.getElementById('card-'+stops[0])?.classList.add('active');
   else{
-    const si=legInfos.findIndex(l=>l.state==='active');
-    if(si>=0)document.getElementById('card-'+stops[si+1])?.classList.add('active');
+    const ai=legInfos.findIndex(l=>l.state==='active');
+    if(ai>=0)document.getElementById('card-'+stops[ai+1])?.classList.add('active');
+    else{
+      const pi=legInfos.findIndex(l=>l.state==='pending');
+      if(pi>=0)document.getElementById('card-'+stops[pi])?.classList.add('active');
+    }
   }
 }
 
-function renderLegsDetail(legInfos,fltData){
-  const t=C(),stops=t.stops;
-  const wrap=document.getElementById('legs-detail');
+// 航段详情
+function renderLegsDetail(legInfos){
+  const t=C(), wrap=document.getElementById('legs-detail');
   wrap.innerHTML='';
   legInfos.forEach((info,i)=>{
-    const d=fltData[i];
-    const depCode=stops[i],arrCode=stops[i+1];
-    const depHM=info.depStr?fmtHM(info.depStr):'--:--';
-    const arrHM=info.arrStr?fmtHM(info.arrStr):'--:--';
-    const depDate=info.depStr?(()=>{const m=info.depStr.match(/(\d{4}-\d{2}-\d{2})/);return m?fmtDate(m[0]):'';})():'';
-    const arrDate=info.arrStr?(()=>{const m=info.arrStr.match(/(\d{4}-\d{2}-\d{2})/);return m?fmtDate(m[0]):'';})():'';
+    const stateLbl=info.state==='done'?'已完成':info.state==='active'?'飞行中':info.state==='pending'?'待出发':'--';
+    const stateCls=info.state==='done'?'done':info.state==='active'?'hi':'';
     const fltNum=t.flights[i]||'--';
-    const delay=d?.delay;
-    const delayStr=delay>0?` <span class="warn">+${delay}分</span>`:'<span class="done">准点</span>';
-
-    let stateLabel='',stateClass='';
-    if(info.state==='done'){stateLabel='已完成';stateClass='done';}
-    else if(info.state==='active'){stateLabel='飞行中';stateClass='hi';}
-    else if(info.state==='pending'){stateLabel='待出发';stateClass='';}
-    else{stateLabel='--';stateClass='';}
-
-    // 剩余时间
     let remStr='';
     if(info.state==='active'&&info.arrUtc){
       const rem=info.arrUtc-Date.now();
-      if(rem>0){const rh=Math.floor(rem/3600000),rm=Math.round((rem%3600000)/60000);remStr=` · 剩 ${rh>0?rh+'小时':''}${rm}分`;}
+      if(rem>0)remStr=` · 剩 ${hhmm(rem)}`;
     }
-
-    // 飞行时长
     let durStr='';
-    if(info.depUtc&&info.arrUtc){
-      const dur=info.arrUtc-info.depUtc;
-      const dh=Math.floor(dur/3600000),dm=Math.round((dur%3600000)/60000);
-      durStr=`${dh}h${dm>0?dm+'m':''}`;
+    if(info.depUtc&&info.arrUtc&&!isNaN(info.depUtc)&&!isNaN(info.arrUtc)){
+      const hasActual=!!(info.d?.depActual&&info.d?.arrActual);
+      durStr=`飞行时长 ${hhmm(info.arrUtc-info.depUtc)}（${hasActual?'实际':'计划'}）`;
     }
-
+    const delay=info.d?.delay;
+    const delayStr=delay>0
+      ?`<span class="delay-txt">延误：+${delay}分</span>`
+      :`<span class="done">准点</span>`;
+    const hasAV=info.d?.src?.includes('AviationStack')&&info.arrStr;
     wrap.innerHTML+=`
     <div class="leg-row">
       <div class="leg-label">第${i+1}段</div>
       <div class="leg-info">
-        <span class="${stateClass}">${stateLabel}</span> · ${fltNum} · ${depCode}→${arrCode}${remStr}<br>
-        出发 <b>${fmtHM(info.depStr)}</b>${info.depStr?' '+fmtDate(info.depStr):''} · ${info.d?.src?.includes('AviationStack')&&info.arrStr?'★预计 ':''}落地 <b>${fmtHM(info.arrStr)}${info.arrStr?' '+fmtDate(info.arrStr):''}</b><br>
-        ${durStr}${delay!==undefined&&delay!==null?' · '+delayStr:''}
+        <span class="${stateCls}">${stateLbl}</span> · ${fltNum} · ${info.depCode}→${info.arrCode}${remStr}<br>
+        出发 <b>${fmtHM(info.depStr)}</b>${info.depStr?' '+fmtDate(info.depStr):''} · ${hasAV?'★预计 ':''}落地 <b>${fmtHM(info.arrStr)}${info.arrStr?' '+fmtDate(info.arrStr):''}</b><br>
+        ${durStr}${delay!=null?' · '+delayStr:''}
       </div>
     </div>`;
   });
 }
 
+// 右上角状态
 function updateLegStatus(legInfos,curIdx,allDone){
   const el=document.getElementById('leg-status');
-  if(allDone&&legInfos.length){
-    el.textContent='旅程完成 ✓';el.className='badge green';
-  } else if(curIdx>=0){
-    const l=legInfos[curIdx];
-    el.textContent=`第${curIdx+1}段飞行中 ${Math.round(l.pct*100)}%`;
+  if(allDone&&legInfos.length){el.textContent='旅程完成 ✓';el.className='badge green';}
+  else if(curIdx>=0){
+    el.textContent=`第${curIdx+1}段飞行中 ${Math.round(legInfos[curIdx].pct*100)}%`;
     el.className='badge blue';
-  } else {
-    // 找第一个pending的段
+  }else{
     const pi=legInfos.findIndex(l=>l.state==='pending');
-    if(pi>=0){
-      el.textContent=`第${pi+1}段 待出发`;
-      el.className='badge gray';
-    } else {
-      el.textContent='尚未出发';
-      el.className='badge gray';
-    }
+    el.textContent=pi>=0?`第${pi+1}段 待出发`:'尚未出发';
+    el.className='badge gray';
   }
 }
 
-function renderProgress(){
-  // 测试模式或无数据时的手动进度
-  const v=+document.getElementById('slider').value;
-  const stops=C().stops,n=stops.length;
-  document.getElementById('tfill').style.width=v+'%';
-  const segSize=100/(n-1);
-  stops.forEach((_,i)=>{const nd=document.getElementById('nd-'+i);if(nd)nd.className='nd'+(v>=i*segSize?' done':'');});
-  const si=Math.min(Math.floor(v/segSize),n-2);
-  const sp=(v-si*segSize)/segSize;
-  stops.forEach(c=>document.getElementById('card-'+c)?.classList.remove('active'));
-  if(v>=100)document.getElementById('card-'+stops[n-1])?.classList.add('active');
-  else if(v===0)document.getElementById('card-'+stops[0])?.classList.add('active');
-  else document.getElementById('card-'+stops[si+1])?.classList.add('active');
-  const totalH=calcDist(stops)/850;
-  document.getElementById('s-flown').textContent=+(totalH*v/100).toFixed(1)+'h';
-  document.getElementById('s-remain').textContent=v>=100?'已抵达':'~'+(totalH*(1-v/100)).toFixed(1)+'h';
-  document.getElementById('leg-status').textContent=v===0?'尚未出发':v>=100?'旅程完成 ✓':`第${si+1}段 ${Math.round(sp*100)}%`;
-  stops.forEach(code=>updateTip(code,v,si,[]));
-}
-
-function updateTip(code,pct,si,legInfos){
-  const el=document.getElementById('tip-'+code);if(!el)return;
-  const stops=C().stops,n=stops.length,idx=stops.indexOf(code);
+// 旅途提示
+function updateTip(code,legInfos){
+  const el=document.getElementById('tip-'+code); if(!el)return;
+  const stops=C().stops, n=stops.length, idx=stops.indexOf(code);
   const wx=wxCache[code];
   const wxStr=wx?`当地${wx.temp}°C，${wxDesc(wx.code)}`:'';
+  const isFirst=idx===0, isLast=idx===n-1;
+  const arrLeg=Array.isArray(legInfos)?legInfos[idx-1]:null; // 到达该城市的段
+  const depLeg=Array.isArray(legInfos)?legInfos[idx]:null;   // 从该城市出发的段
   let txt='';
-  if(!pct||pct===0){txt=idx===0?`旅程尚未开始。${wxStr}`:idx===n-1?`等待旅行者到来。${wxStr}`:wxStr||'中转准备中';}
-  else if(pct>=100){txt=idx===n-1?`旅行者已安全抵达！${wxStr}。祝旅途愉快 🎉`:'旅程已完成';}
-  else{
-    const curLeg=Array.isArray(legInfos)?legInfos.find(l=>l.state==='active'):null;
-    const fromIdx=curLeg?curLeg.idx:si;
-    const toIdx=fromIdx+1;
-    if(idx===fromIdx)txt=`旅行者已离开。${wxStr}`;
-    else if(idx===toIdx)txt=`即将抵达。${wxStr}`;
-    else if(idx<fromIdx)txt=`此站已完成。${wxStr}`;
-    else txt=`等待旅行者到来。${wxStr}`;
+  if(isFirst){
+    const leg0=Array.isArray(legInfos)?legInfos[0]:null;
+    txt=(leg0&&leg0.state!=='pending')?`旅行者已出发。${wxStr}`:`旅行者尚未出发。${wxStr}`;
+  }else if(isLast){
+    if(arrLeg?.state==='done')txt=`旅行者已安全抵达！${wxStr}。祝旅途愉快 🎉`;
+    else if(arrLeg?.state==='active'){
+      const rem=arrLeg.arrUtc?Math.max(0,arrLeg.arrUtc-Date.now()):0;
+      txt=`即将抵达，还有约 ${hhmm(rem)}。${wxStr}`;
+    }else txt=`等待旅行者到来。${wxStr}`;
+  }else{
+    if(arrLeg?.state==='done'&&depLeg?.state==='pending')
+      txt=`旅行者正在中转候机。${wxStr}`;
+    else if(arrLeg?.state==='done'&&depLeg?.state==='done')
+      txt=`中转已完成，旅行者已离开。${wxStr}`;
+    else if(arrLeg?.state==='active')
+      txt=`旅行者即将到达中转地。${wxStr}`;
+    else txt=`等待旅行者中转。${wxStr}`;
   }
   el.textContent=txt||'--';
 }
 
-function setBadge(id,txt,cls){const el=document.getElementById(id);if(el){el.textContent=txt;el.className='badge '+cls;}}
+// ═══════════════════════════════════════
+// 测试模式进度（手动）
+// ═══════════════════════════════════════
+function renderProgressMock(){
+  const v=+document.getElementById('slider').value;
+  const stops=C().stops, n=stops.length, segSize=100/(n-1);
+  document.getElementById('tfill').style.width=v+'%';
+  stops.forEach((_,i)=>{
+    const nd=document.getElementById('nd-'+i);
+    if(nd)nd.className='nd'+(v>=i*segSize?' done':'');
+  });
+  stops.forEach(c=>document.getElementById('card-'+c)?.classList.remove('active'));
+  if(v>=100)document.getElementById('card-'+stops[n-1])?.classList.add('active');
+  else if(v===0)document.getElementById('card-'+stops[0])?.classList.add('active');
+  else{
+    const si=Math.min(Math.floor(v/segSize),n-2);
+    document.getElementById('card-'+stops[si+1])?.classList.add('active');
+  }
+  const totalH=calcDist(stops)/850;
+  document.getElementById('s-flown').textContent=hhmm(totalH*v/100*3600000);
+  document.getElementById('s-remain').textContent=v>=100?'已抵达':'~'+hhmm(totalH*(1-v/100)*3600000);
+  document.getElementById('leg-status').textContent=v===0?'尚未出发':v>=100?'旅程完成 ✓':'飞行中';
+  document.getElementById('legs-detail').innerHTML='';
+  stops.forEach(c=>updateTip(c,[]));
+}
 
-// ══════════════════════════════════
+// ═══════════════════════════════════════
 // 初始化
-// ══════════════════════════════════
-try{loadLocal();}catch(e){TRIPS=[JSON.parse(JSON.stringify(BLANK))];}
-// 确保每个行程都有完整字段
-TRIPS=TRIPS.map(t=>Object.assign(JSON.parse(JSON.stringify(BLANK)),t));
-if(!TRIPS.length)TRIPS=[JSON.parse(JSON.stringify(BLANK))];
-activeTrip=0;
+// ═══════════════════════════════════════
+loadLocal();
 renderTabs();
 loadSettingsUI();
 buildUI();
@@ -1087,7 +1039,7 @@ updateClocks();
 fetchWx();
 fetchFx();
 scheduleRefresh();
-document.getElementById('slider').addEventListener('input',()=>{if(C().mockMode)renderProgress();});
+document.getElementById('slider').addEventListener('input',()=>{if(C().mockMode)renderProgressMock();});
 setInterval(updateClocks,60000);
 setInterval(()=>{wxCache={};fxCache={};fxTime=0;fetchWx();fetchFx();},WX_TTL);
 </script>
