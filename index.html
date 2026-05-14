@@ -937,11 +937,10 @@ function renderLegsDetail(legInfos){
     }
     let durStr='';
     if(info.depUtc&&info.arrUtc&&!isNaN(info.depUtc)&&!isNaN(info.arrUtc)){
-      const depA=info.d?.depIsActual===true;
-      const arrA=info.d?.arrIsActual===true;
-      // 未起飞的航段，飞行时长只能是计划
-      const label=info.state==='pending'?'计划':
-        (depA&&arrA?'实际':depA||arrA?'部分实际':'计划');
+      const label=
+        info.state==='done'   ? '实际' :
+        info.state==='active' ? '出发实际，落地预计' :
+        '计划';
       durStr=`飞行时长 ${hhmm(info.arrUtc-info.depUtc)}（${label}）`;
     }
     const delay=info.d?.delay;
